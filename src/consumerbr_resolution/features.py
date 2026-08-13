@@ -24,6 +24,7 @@ def build_feature_base():
     target_path = str(temporary_path).replace("'", "''")
 
     valid_ufs = ", ".join(f"'{uf}'" for uf in VALID_UFS)
+    anonymization_pattern = r"\[[A-ZÀ-Ü_]+\]"
 
     print("Building deterministic pre-response features")
     print(f"Source: {CLEAN_BASE_PATH}")
@@ -97,7 +98,7 @@ def build_feature_base():
                     ARRAY_LENGTH(
                         REGEXP_EXTRACT_ALL(
                             complaint_text,
-                            '\\\\[[A-ZÀ-Ü_]+\\\\]'
+                            '{anonymization_pattern}'
                         )
                     ) AS anonymization_marker_count,
                     CASE
@@ -114,7 +115,7 @@ def build_feature_base():
                         WHEN ARRAY_LENGTH(
                             REGEXP_EXTRACT_ALL(
                                 complaint_text,
-                                '\\\\[[A-ZÀ-Ü_]+\\\\]'
+                                '{anonymization_pattern}'
                             )
                         ) > 0
                             THEN 1

@@ -187,7 +187,13 @@ def characterize_dataset():
                     AVG(question_count) AS mean_question_count,
                     AVG(
                         anonymization_marker_count
-                    ) AS mean_anonymization_marker_count
+                    ) AS mean_anonymization_marker_count,
+                    MAX(
+                        anonymization_marker_count
+                    ) AS max_anonymization_marker_count,
+                    AVG(
+                        has_anonymization_marker
+                    ) AS anonymization_marker_rate
                 FROM read_parquet('{source_path}')
             )
             TO '{feature_path}'
