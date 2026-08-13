@@ -859,9 +859,20 @@ def evaluate_bertimbau():
                 / f"fold_{fold_number:02d}"
             )
 
-            prediction_path = (
+            validation_prediction_path = (
                 BERTIMBAU_PREDICTIONS_DIR
-                / f"fold_{fold_number:02d}.parquet"
+                / (
+                    f"fold_{fold_number:02d}"
+                    "_validation.parquet"
+                )
+            )
+
+            test_prediction_path = (
+                BERTIMBAU_PREDICTIONS_DIR
+                / (
+                    f"fold_{fold_number:02d}"
+                    "_test.parquet"
+                )
             )
 
             metrics_path = (
@@ -871,7 +882,8 @@ def evaluate_bertimbau():
 
             outputs = [
                 model_path,
-                prediction_path,
+                validation_prediction_path,
+                test_prediction_path,
                 metrics_path,
             ]
 
@@ -891,8 +903,11 @@ def evaluate_bertimbau():
                     model_path
                 )
 
-            if prediction_path.exists():
-                prediction_path.unlink()
+            if validation_prediction_path.exists():
+                validation_prediction_path.unlink()
+
+            if test_prediction_path.exists():
+                test_prediction_path.unlink()
 
             if metrics_path.exists():
                 metrics_path.unlink()
@@ -960,6 +975,7 @@ def evaluate_bertimbau():
                 ],
                 tokenizer=tokenizer,
                 device=device,
+                include_identifiers=True,
             )
 
             (
@@ -1022,7 +1038,15 @@ def evaluate_bertimbau():
 
             write_predictions(
                 prediction_path=(
-                    prediction_path
+                    validation_prediction_path
+                ),
+                result=validation,
+                threshold=threshold,
+            )
+
+            write_predictions(
+                prediction_path=(
+                    test_prediction_path
                 ),
                 result=test,
                 threshold=threshold,

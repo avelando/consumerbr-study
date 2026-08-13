@@ -394,9 +394,20 @@ def evaluate_catboost():
                 / f"fold_{fold_number:02d}.cbm"
             )
 
-            prediction_path = (
+            validation_prediction_path = (
                 PREDICTION_DIRECTORY
-                / f"fold_{fold_number:02d}.parquet"
+                / (
+                    f"fold_{fold_number:02d}"
+                    "_validation.parquet"
+                )
+            )
+
+            test_prediction_path = (
+                PREDICTION_DIRECTORY
+                / (
+                    f"fold_{fold_number:02d}"
+                    "_test.parquet"
+                )
             )
 
             metrics_path = (
@@ -406,7 +417,8 @@ def evaluate_catboost():
 
             outputs = [
                 model_path,
-                prediction_path,
+                validation_prediction_path,
+                test_prediction_path,
                 metrics_path,
             ]
 
@@ -448,6 +460,7 @@ def evaluate_catboost():
                         fold_number,
                         "validation",
                     ),
+                    include_identifiers=True,
                 )
             )
 
@@ -641,7 +654,17 @@ def evaluate_catboost():
             write_predictions(
                 connection=connection,
                 prediction_path=(
-                    prediction_path
+                    validation_prediction_path
+                ),
+                frame=validation_frame,
+                scores=validation_scores,
+                threshold=threshold,
+            )
+
+            write_predictions(
+                connection=connection,
+                prediction_path=(
+                    test_prediction_path
                 ),
                 frame=test_frame,
                 scores=test_scores,
