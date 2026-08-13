@@ -16,6 +16,10 @@ METADATA_SGD_MODELS_DIR = CLASSICAL_MODELS_DIR / "metadata_sgd"
 TFIDF_METADATA_SGD_MODELS_DIR = (
     CLASSICAL_MODELS_DIR / "tfidf_metadata_sgd"
 )
+TFIDF_METADATA_HISTORY_SGD_MODELS_DIR = (
+    CLASSICAL_MODELS_DIR
+    / "tfidf_metadata_history_sgd"
+)
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 METRICS_DIR = RESULTS_DIR / "metrics"
@@ -184,6 +188,7 @@ def create_project_directories():
         TFIDF_SGD_MODELS_DIR,
         METADATA_SGD_MODELS_DIR,
         TFIDF_METADATA_SGD_MODELS_DIR,
+        TFIDF_METADATA_HISTORY_SGD_MODELS_DIR,
         METRICS_DIR,
         PREDICTIONS_DIR,
         TABLES_DIR,
