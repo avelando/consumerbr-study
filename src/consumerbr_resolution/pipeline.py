@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.bertimbau_assets import (
+    prepare_bertimbau_assets,
+)
 from consumerbr_resolution.tabular_catboost import (
     evaluate_catboost,
 )
@@ -162,6 +165,11 @@ STAGES = [
         command="catboost",
         name="Evaluate CatBoost tabular model",
         function=evaluate_catboost,
+    ),
+    Stage(
+        command="bertimbau-assets",
+        name="Prepare BERTimbau pretrained assets",
+        function=prepare_bertimbau_assets,
     ),
 ]
 

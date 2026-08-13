@@ -9,12 +9,16 @@ requires-python = ">=3.10"
 dependencies = [
     "catboost==1.2.10",
     "duckdb",
+    "huggingface-hub",
     "joblib",
     "numpy",
     "pandas",
+    "pyarrow",
     "requests",
     "scikit-learn",
     "scipy",
+    "torch",
+    "transformers",
     "tqdm"
 ]
 
