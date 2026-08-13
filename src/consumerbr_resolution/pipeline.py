@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.clean import clean_modeling_base
 from consumerbr_resolution.convert import convert_corpus_to_parquet
 from consumerbr_resolution.download import download_corpus
 from consumerbr_resolution.extract import extract_corpus
@@ -34,6 +35,11 @@ STAGES = [
         command="modeling-base",
         name="Build binary modeling base",
         function=build_modeling_base,
+    ),
+    Stage(
+        command="clean",
+        name="Clean modeling base",
+        function=clean_modeling_base,
     ),
 ]
 
