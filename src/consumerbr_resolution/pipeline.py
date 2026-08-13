@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.tfidf_metadata_sgd import (
+    evaluate_tfidf_metadata_sgd,
+)
 from consumerbr_resolution.metadata_sgd import (
     evaluate_metadata_sgd,
 )
@@ -122,6 +125,11 @@ STAGES = [
         command="metadata-sgd",
         name="Evaluate metadata with SGD",
         function=evaluate_metadata_sgd,
+    ),
+    Stage(
+        command="tfidf-metadata-sgd",
+        name="Evaluate TF-IDF with metadata using SGD",
+        function=evaluate_tfidf_metadata_sgd,
     ),
 ]
 
