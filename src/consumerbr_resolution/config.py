@@ -56,6 +56,7 @@ METRICS_DIR = RESULTS_DIR / "metrics"
 PREDICTIONS_DIR = RESULTS_DIR / "predictions"
 TABLES_DIR = RESULTS_DIR / "tables"
 FIGURES_DIR = RESULTS_DIR / "figures"
+ANALYSIS_DIR = RESULTS_DIR / "analysis"
 
 LOGS_DIR = PROJECT_ROOT / "logs"
 
@@ -279,6 +280,7 @@ def create_project_directories():
         PREDICTIONS_DIR,
         TABLES_DIR,
         FIGURES_DIR,
+        ANALYSIS_DIR,
         LOGS_DIR,
     ]
 

@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.generalization_analysis import (
+    analyze_generalization,
+)
 from consumerbr_resolution.bertimbau_catboost_fusion import (
     evaluate_bertimbau_catboost_fusion,
 )
@@ -194,6 +197,11 @@ STAGES = [
         command="bertimbau-catboost-fusion",
         name="Evaluate BERTimbau and CatBoost late fusion",
         function=evaluate_bertimbau_catboost_fusion,
+    ),
+    Stage(
+        command="generalization",
+        name="Analyze temporal and company generalization",
+        function=analyze_generalization,
     ),
 ]
 
