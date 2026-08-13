@@ -213,16 +213,6 @@ def write_train_history(
         build_train_recent_output_columns()
     )
 
-    recent_aggregate_columns = (
-        build_future_recent_aggregate_columns(
-            train_end=train_end,
-        )
-    )
-
-    recent_output_columns = (
-        build_future_recent_output_columns()
-    )
-
     connection.execute(
         f"""
         COPY (
@@ -252,6 +242,16 @@ def write_train_history(
                     company,
                     opening_date,
                     COALESCE(
+                        SUM(daily_count) OVER (
+                            PARTITION BY company
+                            ORDER BY opening_date
+                            ROWS BETWEEN
+                                UNBOUNDED PRECEDING
+                                AND 1 PRECEDING
+                        ),
+                        0
+                    ) AS prior_company_count,
+                    COALESCE(
                         SUM(daily_resolved) OVER (
                             PARTITION BY company
                             ORDER BY opening_date
@@ -262,16 +262,6 @@ def write_train_history(
                         0
                     ) AS prior_company_resolved,
                     {recent_history_columns}
-                    COALESCE(
-                        SUM(daily_resolved) OVER (
-                            PARTITION BY company
-                            ORDER BY opening_date
-                            ROWS BETWEEN
-                                UNBOUNDED PRECEDING
-                                AND 1 PRECEDING
-                        ),
-                        0
-                    ) AS prior_company_resolved
                 FROM company_daily
             ),
             global_daily AS (
@@ -396,6 +386,16 @@ def write_future_history(
         temporary_path
     ).replace("'", "''")
 
+    recent_aggregate_columns = (
+        build_future_recent_aggregate_columns(
+            train_end=train_end,
+        )
+    )
+
+    recent_output_columns = (
+        build_future_recent_output_columns()
+    )
+
     connection.execute(
         f"""
         COPY (
@@ -449,8 +449,7 @@ def write_future_history(
                     ELSE 1
                 END AS company_seen_before,
                 global_history.global_history_rate
-                    AS global_history_rate
-                ,
+                    AS global_history_rate,
                 {recent_output_columns}
             FROM read_parquet('{source_path}')
                 AS data
