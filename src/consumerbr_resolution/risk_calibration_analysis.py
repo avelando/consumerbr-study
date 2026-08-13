@@ -40,7 +40,7 @@ RISK_FIELDS = [
     "model",
     "fraction",
     "selected_count",
-    "unresolved_count",
+    "expected_unresolved_count",
     "base_unresolved_rate",
     "precision_at_k",
     "recall_at_k",
@@ -124,11 +124,6 @@ def calculate_risk_ranking(
         - scores
     )
 
-    order = np.argsort(
-        -risks,
-        kind="mergesort",
-    )
-
     unresolved_total = int(
         unresolved.sum()
     )
@@ -152,24 +147,68 @@ def calculate_risk_ranking(
             ),
         )
 
-        selected_indices = order[
-            :selected_count
-        ]
+        sorted_risks = np.sort(
+            risks
+        )[::-1]
 
-        selected_unresolved = int(
+        boundary_risk = (
+            sorted_risks[
+                selected_count - 1
+            ]
+        )
+
+        above_mask = (
+            risks > boundary_risk
+        )
+
+        tied_mask = (
+            risks == boundary_risk
+        )
+
+        above_count = int(
+            above_mask.sum()
+        )
+
+        tied_count = int(
+            tied_mask.sum()
+        )
+
+        remaining_count = (
+            selected_count
+            - above_count
+        )
+
+        above_unresolved = float(
             unresolved[
-                selected_indices
+                above_mask
             ].sum()
         )
 
+        tied_unresolved = float(
+            unresolved[
+                tied_mask
+            ].sum()
+        )
+
+        expected_tied_unresolved = (
+            remaining_count
+            * tied_unresolved
+            / tied_count
+        )
+
+        expected_unresolved = (
+            above_unresolved
+            + expected_tied_unresolved
+        )
+
         precision = (
-            selected_unresolved
+            expected_unresolved
             / selected_count
         )
 
         if unresolved_total > 0:
             recall = (
-                selected_unresolved
+                expected_unresolved
                 / unresolved_total
             )
         else:
@@ -193,8 +232,8 @@ def calculate_risk_ranking(
                 "selected_count": (
                     selected_count
                 ),
-                "unresolved_count": (
-                    selected_unresolved
+                "expected_unresolved_count": (
+                    expected_unresolved
                 ),
                 "base_unresolved_rate": (
                     base_rate
@@ -202,8 +241,12 @@ def calculate_risk_ranking(
                 "precision_at_k": (
                     precision
                 ),
-                "recall_at_k": recall,
-                "lift_at_k": lift,
+                "recall_at_k": (
+                    recall
+                ),
+                "lift_at_k": (
+                    lift
+                ),
             }
         )
 
@@ -431,22 +474,18 @@ def analyze_risk_and_calibration():
                     dtype=np.float64,
                 )
 
-                if (
-                    model_name
-                    != "global_prior"
-                ):
-                    risk_rows.extend(
-                        calculate_risk_ranking(
-                            targets=targets,
-                            scores=scores,
-                            fold_number=(
-                                fold_number
-                            ),
-                            model_name=(
-                                model_name
-                            ),
-                        )
+                risk_rows.extend(
+                    calculate_risk_ranking(
+                        targets=targets,
+                        scores=scores,
+                        fold_number=(
+                            fold_number
+                        ),
+                        model_name=(
+                            model_name
+                        ),
                     )
+                )
 
                 (
                     calibration_summary,
