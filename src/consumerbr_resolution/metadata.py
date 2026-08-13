@@ -308,7 +308,20 @@ def fit_metadata_preprocessors():
         f"Models: {METADATA_MODELS_DIR}"
     )
 
-    summary_rows = []
+    summary_rows = {}
+
+    if METADATA_SUMMARY_PATH.exists():
+        with METADATA_SUMMARY_PATH.open(
+            "r",
+            newline="",
+            encoding="utf-8",
+        ) as file:
+            reader = csv.DictReader(file)
+
+            for row in reader:
+                summary_rows[
+                    int(row["fold"])
+                ] = row
 
     connection = duckdb.connect()
 
@@ -321,13 +334,19 @@ def fit_metadata_preprocessors():
                 / f"fold_{fold_number:02d}.joblib"
             )
 
-            if model_path.exists():
+            if (
+                model_path.exists()
+                and fold_number in summary_rows
+            ):
                 print()
                 print(
                     f"Metadata preprocessor fold "
                     f"{fold_number} already exists."
                 )
                 continue
+
+            if model_path.exists():
+                model_path.unlink()
 
             print()
             print(
@@ -458,43 +477,41 @@ def fit_metadata_preprocessors():
                 - start_time
             )
 
-            summary_rows.append(
-                {
-                    "fold": fold_number,
-                    "train_end": train_end,
-                    "train_document_count": (
-                        int(
-                            train_document_count
-                        )
-                    ),
-                    "numeric_feature_count": (
-                        numeric_feature_count
-                    ),
-                    "frequent_company_count": (
-                        len(
-                            frequent_companies
-                        )
-                    ),
-                    "company_feature_count": (
-                        company_feature_count
-                    ),
-                    "uf_feature_count": (
-                        uf_feature_count
-                    ),
-                    "total_feature_count_with_company": (
-                        numeric_feature_count
-                        + company_feature_count
-                        + uf_feature_count
-                    ),
-                    "total_feature_count_without_company": (
-                        numeric_feature_count
-                        + uf_feature_count
-                    ),
-                    "fit_seconds": (
-                        fit_seconds
-                    ),
-                }
-            )
+            summary_rows[fold_number] = {
+                "fold": fold_number,
+                "train_end": train_end,
+                "train_document_count": (
+                    int(
+                        train_document_count
+                    )
+                ),
+                "numeric_feature_count": (
+                    numeric_feature_count
+                ),
+                "frequent_company_count": (
+                    len(
+                        frequent_companies
+                    )
+                ),
+                "company_feature_count": (
+                    company_feature_count
+                ),
+                "uf_feature_count": (
+                    uf_feature_count
+                ),
+                "total_feature_count_with_company": (
+                    numeric_feature_count
+                    + company_feature_count
+                    + uf_feature_count
+                ),
+                "total_feature_count_without_company": (
+                    numeric_feature_count
+                    + uf_feature_count
+                ),
+                "fit_seconds": (
+                    fit_seconds
+                ),
+            }
 
             print(
                 f"Frequent companies: "
@@ -518,50 +535,10 @@ def fit_metadata_preprocessors():
     finally:
         connection.close()
 
-    rows_by_fold = {
-        int(row["fold"]): row
-        for row in summary_rows
-    }
-
-    if METADATA_SUMMARY_PATH.exists():
-        with METADATA_SUMMARY_PATH.open(
-            "r",
-            newline="",
-            encoding="utf-8",
-        ) as file:
-            reader = csv.DictReader(
-                file
-            )
-
-            for row in reader:
-                fold_number = int(
-                    row["fold"]
-                )
-
-                if fold_number not in rows_by_fold:
-                    rows_by_fold[
-                        fold_number
-                    ] = row
-
     ordered_rows = [
-        rows_by_fold[fold["fold"]]
+        summary_rows[fold["fold"]]
         for fold in TEMPORAL_FOLDS
     ]
-
-    with METADATA_SUMMARY_PATH.open(
-        "w",
-        newline="",
-        encoding="utf-8",
-    ) as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=SUMMARY_FIELDS,
-        )
-
-        writer.writeheader()
-        writer.writerows(
-            ordered_rows
-        )
 
     print()
     print(
