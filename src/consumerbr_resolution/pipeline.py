@@ -16,6 +16,18 @@ from consumerbr_resolution.generalization_analysis import (
 from consumerbr_resolution.bertimbau_catboost_fusion import (
     evaluate_bertimbau_catboost_fusion,
 )
+from consumerbr_resolution.albertina_assets import (
+    prepare_albertina_assets,
+)
+from consumerbr_resolution.albertina_tokens import (
+    build_albertina_token_cache,
+)
+from consumerbr_resolution.albertina_finetuning import (
+    evaluate_albertina,
+)
+from consumerbr_resolution.albertina_catboost_fusion import (
+    evaluate_albertina_catboost_fusion,
+)
 from consumerbr_resolution.bertimbau_finetuning import (
     evaluate_bertimbau,
 )
@@ -206,6 +218,26 @@ STAGES = [
         command="bertimbau-catboost-fusion",
         name="Evaluate BERTimbau and CatBoost late fusion",
         function=evaluate_bertimbau_catboost_fusion,
+    ),
+    Stage(
+        command="albertina-assets",
+        name="Prepare Albertina pretrained assets",
+        function=prepare_albertina_assets,
+    ),
+    Stage(
+        command="albertina-tokens",
+        name="Build Albertina token cache",
+        function=build_albertina_token_cache,
+    ),
+    Stage(
+        command="albertina",
+        name="Evaluate Albertina temporal fine-tuning",
+        function=evaluate_albertina,
+    ),
+    Stage(
+        command="albertina-catboost-fusion",
+        name="Evaluate Albertina and CatBoost late fusion",
+        function=evaluate_albertina_catboost_fusion,
     ),
     Stage(
         command="generalization",
