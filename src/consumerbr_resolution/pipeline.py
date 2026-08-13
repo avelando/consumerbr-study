@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.metadata_sgd import (
+    evaluate_metadata_sgd,
+)
 from consumerbr_resolution.metadata import (
     fit_metadata_preprocessors,
 )
@@ -114,6 +117,11 @@ STAGES = [
         command="metadata",
         name="Fit fold-specific metadata preprocessors",
         function=fit_metadata_preprocessors,
+    ),
+    Stage(
+        command="metadata-sgd",
+        name="Evaluate metadata with SGD",
+        function=evaluate_metadata_sgd,
     ),
 ]
 
