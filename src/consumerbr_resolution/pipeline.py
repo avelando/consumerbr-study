@@ -175,6 +175,21 @@ STAGES = [
         function=evaluate_metadata_sgd,
     ),
     Stage(
+        command="tfidf-char",
+        name="Fit fold-specific character TF-IDF vectorizers",
+        function=fit_tfidf_char_vectorizers,
+    ),
+    Stage(
+        command="tfidf-char-sgd",
+        name="Evaluate character TF-IDF with SGD",
+        function=evaluate_tfidf_char_sgd,
+    ),
+    Stage(
+        command="tfidf-word-char-sgd",
+        name="Evaluate word and character TF-IDF with SGD",
+        function=evaluate_tfidf_word_char_sgd,
+    ),
+    Stage(
         command="tfidf-metadata-sgd",
         name="Evaluate TF-IDF with metadata using SGD",
         function=evaluate_tfidf_metadata_sgd,

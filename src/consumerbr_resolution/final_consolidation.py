@@ -75,6 +75,10 @@ METRIC_SOURCE_PATHS = (
     METRICS_DIR
     / "tfidf_sgd_metrics.csv",
     METRICS_DIR
+    / "tfidf_char_sgd_metrics.csv",
+    METRICS_DIR
+    / "tfidf_word_char_sgd_metrics.csv",
+    METRICS_DIR
     / "metadata_sgd_metrics.csv",
     METRICS_DIR
     / "tfidf_metadata_sgd_metrics.csv",
@@ -145,6 +149,21 @@ ABLATION_COMPARISONS = (
         "metadata_over_text",
         "tfidf_sgd",
         "tfidf_metadata_sgd",
+    ),
+    (
+        "character_over_word",
+        "tfidf_sgd",
+        "tfidf_char_sgd",
+    ),
+    (
+        "word_char_over_word",
+        "tfidf_sgd",
+        "tfidf_word_char_sgd",
+    ),
+    (
+        "word_char_over_character",
+        "tfidf_char_sgd",
+        "tfidf_word_char_sgd",
     ),
     (
         "company_history",

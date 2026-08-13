@@ -35,6 +35,26 @@ MODEL_PREDICTION_SPECS = (
         "prediction_column": "prediction",
     },
     {
+        "model": "tfidf_char_sgd",
+        "directory": (
+            PREDICTIONS_DIR
+            / "tfidf_char_sgd"
+        ),
+        "filename": "fold_{fold:02d}.parquet",
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
+        "model": "tfidf_word_char_sgd",
+        "directory": (
+            PREDICTIONS_DIR
+            / "tfidf_word_char_sgd"
+        ),
+        "filename": "fold_{fold:02d}.parquet",
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
         "model": "metadata_without_company",
         "directory": (
             PREDICTIONS_DIR
