@@ -200,7 +200,7 @@ CATBOOST_DEVICES = "0"
 CATBOOST_GPU_RAM_PART = 0.80
 
 BERTIMBAU_MODEL_NAME = (
-    "neuralmind/bert-large-portuguese-cased"
+    "neuralmind/bert-base-portuguese-cased"
 )
 
 BERTIMBAU_REVISION = (
