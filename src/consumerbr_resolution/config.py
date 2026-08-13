@@ -73,6 +73,57 @@ VALID_UFS = (
     "TO",
 )
 
+TEMPORAL_FOLDS = (
+    {
+        "fold": 1,
+        "train_end": "2023-06-30",
+        "validation_start": "2023-07-01",
+        "validation_end": "2023-09-30",
+        "test_start": "2023-10-01",
+        "test_end": "2023-12-31",
+    },
+    {
+        "fold": 2,
+        "train_end": "2023-09-30",
+        "validation_start": "2023-10-01",
+        "validation_end": "2023-12-31",
+        "test_start": "2024-01-01",
+        "test_end": "2024-03-31",
+    },
+    {
+        "fold": 3,
+        "train_end": "2023-12-31",
+        "validation_start": "2024-01-01",
+        "validation_end": "2024-03-31",
+        "test_start": "2024-04-01",
+        "test_end": "2024-06-30",
+    },
+    {
+        "fold": 4,
+        "train_end": "2024-03-31",
+        "validation_start": "2024-04-01",
+        "validation_end": "2024-06-30",
+        "test_start": "2024-07-01",
+        "test_end": "2024-09-30",
+    },
+    {
+        "fold": 5,
+        "train_end": "2024-06-30",
+        "validation_start": "2024-07-01",
+        "validation_end": "2024-09-30",
+        "test_start": "2024-10-01",
+        "test_end": "2024-12-31",
+    },
+    {
+        "fold": 6,
+        "train_end": "2024-09-30",
+        "validation_start": "2024-10-01",
+        "validation_end": "2024-12-31",
+        "test_start": "2025-01-01",
+        "test_end": "2025-03-31",
+    },
+)
+
 def create_project_directories():
     directories = [
         RAW_DATA_DIR,

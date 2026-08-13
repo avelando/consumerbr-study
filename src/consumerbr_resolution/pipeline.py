@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.temporal_protocol import (
+    build_temporal_protocol,
+)
 from consumerbr_resolution.selection_bias import (
     analyze_outcome_observation,
 )
@@ -60,6 +63,11 @@ STAGES = [
         command="selection-bias",
         name="Analyze outcome observation patterns",
         function=analyze_outcome_observation,
+    ),
+    Stage(
+        command="temporal-protocol",
+        name="Build temporal evaluation protocol",
+        function=build_temporal_protocol,
     ),
 ]
 
