@@ -9,8 +9,10 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"
 
 MODELS_DIR = PROJECT_ROOT / "models"
 TFIDF_MODELS_DIR = MODELS_DIR / "tfidf"
+METADATA_MODELS_DIR = MODELS_DIR / "metadata"
 CLASSICAL_MODELS_DIR = MODELS_DIR / "classical"
 TFIDF_SGD_MODELS_DIR = CLASSICAL_MODELS_DIR / "tfidf_sgd"
+METADATA_SGD_MODELS_DIR = CLASSICAL_MODELS_DIR / "metadata_sgd"
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 METRICS_DIR = RESULTS_DIR / "metrics"
@@ -144,6 +146,26 @@ SGD_ALPHA = 1e-5
 SGD_EPOCHS = 5
 SGD_BATCH_SIZE = 10_000
 
+COMPANY_MIN_FREQUENCY = 100
+RARE_COMPANY_LABEL = "RARE_OR_UNSEEN"
+
+METADATA_NUMERIC_FEATURES = (
+    "text_char_count",
+    "text_word_count",
+    "log_text_char_count",
+    "log_text_word_count",
+    "exclamation_count",
+    "question_count",
+    "anonymization_marker_count",
+    "has_exclamation",
+    "has_question",
+    "has_anonymization_marker",
+    "opening_month_sin",
+    "opening_month_cos",
+    "opening_weekday_sin",
+    "opening_weekday_cos",
+)
+
 def create_project_directories():
     directories = [
         RAW_DATA_DIR,
@@ -151,8 +173,10 @@ def create_project_directories():
         PROCESSED_DATA_DIR,
         MODELS_DIR,
         TFIDF_MODELS_DIR,
+        METADATA_MODELS_DIR,
         CLASSICAL_MODELS_DIR,
         TFIDF_SGD_MODELS_DIR,
+        METADATA_SGD_MODELS_DIR,
         METRICS_DIR,
         PREDICTIONS_DIR,
         TABLES_DIR,

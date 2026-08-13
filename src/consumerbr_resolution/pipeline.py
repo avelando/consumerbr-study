@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.metadata import (
+    fit_metadata_preprocessors,
+)
 from consumerbr_resolution.tfidf_sgd import (
     evaluate_tfidf_sgd,
 )
@@ -106,6 +109,11 @@ STAGES = [
         command="tfidf-sgd",
         name="Evaluate TF-IDF with SGD",
         function=evaluate_tfidf_sgd,
+    ),
+    Stage(
+        command="metadata",
+        name="Fit fold-specific metadata preprocessors",
+        function=fit_metadata_preprocessors,
     ),
 ]
 
