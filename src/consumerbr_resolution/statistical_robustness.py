@@ -13,6 +13,8 @@ from consumerbr_resolution.config import (
     BOOTSTRAP_CONFIDENCE_LEVEL,
     BOOTSTRAP_REPLICATES,
     FEATURE_BASE_PATH,
+    PERMUTATION_REPLICATES,
+    RANDOM_SEED,
     RANDOM_SEED,
     TEMPORAL_FOLDS,
     create_project_directories,
@@ -47,6 +49,7 @@ PAIRWISE_FIELDS = [
     "model_b",
     "fold_count",
     "bootstrap_replicates",
+    "permutation_replicates",
     "confidence_level",
     "observed_mean_macro_f1_a",
     "observed_mean_macro_f1_b",
@@ -450,37 +453,160 @@ def get_confidence_interval(
     )
 
 
-def calculate_two_sided_p_value(
-    deltas,
+def permutation_pair_fold(
+    targets,
+    predictions_a,
+    predictions_b,
+    rng,
 ):
-    non_positive = (
-        np.count_nonzero(
-            deltas <= 0.0
+    categories = (
+        targets.astype(np.int64)
+        * 4
+        + predictions_a.astype(
+            np.int64
         )
-        + 1
-    ) / (
-        len(deltas)
-        + 1
+        * 2
+        + predictions_b.astype(
+            np.int64
+        )
     )
 
-    non_negative = (
-        np.count_nonzero(
-            deltas >= 0.0
-        )
-        + 1
-    ) / (
-        len(deltas)
-        + 1
+    counts = np.bincount(
+        categories,
+        minlength=8,
     )
 
-    return float(
-        min(
-            1.0,
-            2.0
-            * min(
-                non_positive,
-                non_negative,
+    discordant_negative = int(
+        counts[1] + counts[2]
+    )
+
+    discordant_positive = int(
+        counts[5] + counts[6]
+    )
+
+    a_positive_negative = rng.binomial(
+        discordant_negative,
+        0.5,
+        size=PERMUTATION_REPLICATES,
+    )
+
+    a_positive_positive = rng.binomial(
+        discordant_positive,
+        0.5,
+        size=PERMUTATION_REPLICATES,
+    )
+
+    a_negative_negative = (
+        discordant_negative
+        - a_positive_negative
+    )
+
+    a_negative_positive = (
+        discordant_positive
+        - a_positive_positive
+    )
+
+    true_negative_a = (
+        counts[0]
+        + a_negative_negative
+    )
+
+    false_positive_a = (
+        counts[3]
+        + a_positive_negative
+    )
+
+    false_negative_a = (
+        counts[4]
+        + a_negative_positive
+    )
+
+    true_positive_a = (
+        counts[7]
+        + a_positive_positive
+    )
+
+    true_negative_b = (
+        counts[0]
+        + a_positive_negative
+    )
+
+    false_positive_b = (
+        counts[3]
+        + a_negative_negative
+    )
+
+    false_negative_b = (
+        counts[4]
+        + a_positive_positive
+    )
+
+    true_positive_b = (
+        counts[7]
+        + a_negative_positive
+    )
+
+    macro_f1_a = (
+        macro_f1_from_confusion(
+            true_negative=(
+                true_negative_a
             ),
+            false_positive=(
+                false_positive_a
+            ),
+            false_negative=(
+                false_negative_a
+            ),
+            true_positive=(
+                true_positive_a
+            ),
+        )
+    )
+
+    macro_f1_b = (
+        macro_f1_from_confusion(
+            true_negative=(
+                true_negative_b
+            ),
+            false_positive=(
+                false_positive_b
+            ),
+            false_negative=(
+                false_negative_b
+            ),
+            true_positive=(
+                true_positive_b
+            ),
+        )
+    )
+
+    return (
+        macro_f1_a
+        - macro_f1_b
+    )
+
+
+def calculate_permutation_p_value(
+    observed_delta,
+    permutation_deltas,
+):
+    return float(
+        (
+            np.count_nonzero(
+                np.abs(
+                    permutation_deltas
+                )
+                >= abs(
+                    observed_delta
+                )
+            )
+            + 1
+        )
+        / (
+            len(
+                permutation_deltas
+            )
+            + 1
         )
     )
 
@@ -682,6 +808,14 @@ def analyze_pairwise_models(
             + pair_index
         )
 
+        permutation_rng = (
+            np.random.default_rng(
+                RANDOM_SEED
+                + 200_000
+                + pair_index
+            )
+        )
+
         observed_a = []
         observed_b = []
 
@@ -692,6 +826,11 @@ def analyze_pairwise_models(
 
         bootstrap_b_sum = np.zeros(
             BOOTSTRAP_REPLICATES,
+            dtype=np.float64,
+        )
+
+        permutation_delta_sum = np.zeros(
+            PERMUTATION_REPLICATES,
             dtype=np.float64,
         )
 
@@ -786,6 +925,21 @@ def analyze_pairwise_models(
                 bootstrap_b
             )
 
+            permutation_delta_sum += (
+                permutation_pair_fold(
+                    targets=targets,
+                    predictions_a=(
+                        predictions_a
+                    ),
+                    predictions_b=(
+                        predictions_b
+                    ),
+                    rng=(
+                        permutation_rng
+                    ),
+                )
+            )
+
         bootstrap_a_mean = (
             bootstrap_a_sum
             / fold_count
@@ -825,9 +979,19 @@ def analyze_pairwise_models(
             bootstrap_delta
         )
 
+        permutation_delta = (
+            permutation_delta_sum
+            / fold_count
+        )
+
         p_value = (
-            calculate_two_sided_p_value(
-                bootstrap_delta
+            calculate_permutation_p_value(
+                observed_delta=(
+                    observed_delta
+                ),
+                permutation_deltas=(
+                    permutation_delta
+                ),
             )
         )
 
@@ -840,6 +1004,9 @@ def analyze_pairwise_models(
                 ),
                 "bootstrap_replicates": (
                     BOOTSTRAP_REPLICATES
+                ),
+                "permutation_replicates": (
+                    PERMUTATION_REPLICATES
                 ),
                 "confidence_level": (
                     BOOTSTRAP_CONFIDENCE_LEVEL
