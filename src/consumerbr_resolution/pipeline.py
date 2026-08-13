@@ -64,6 +64,19 @@ from consumerbr_resolution.tfidf_sgd import (
 from consumerbr_resolution.tfidf import (
     fit_tfidf_vectorizers,
 )
+from consumerbr_resolution.tfidf_sgd import (
+    evaluate_tfidf_sgd,
+)
+from consumerbr_resolution.tfidf_char import (
+    fit_tfidf_char_vectorizers,
+)
+from consumerbr_resolution.tfidf_variant_sgd import (
+    evaluate_tfidf_char_sgd,
+    evaluate_tfidf_word_char_sgd,
+)
+from consumerbr_resolution.tfidf import (
+    fit_tfidf_vectorizers,
+)
 from consumerbr_resolution.baselines import (
     evaluate_historical_baselines,
 )
