@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.statistical_robustness import (
+    analyze_statistical_robustness,
+)
 from consumerbr_resolution.risk_calibration_analysis import (
     analyze_risk_and_calibration,
 )
@@ -210,6 +213,11 @@ STAGES = [
         command="risk-calibration",
         name="Analyze risk ranking and calibration",
         function=analyze_risk_and_calibration,
+    ),
+    Stage(
+        command="statistical-robustness",
+        name="Analyze statistical robustness",
+        function=analyze_statistical_robustness,
     ),
 ]
 
