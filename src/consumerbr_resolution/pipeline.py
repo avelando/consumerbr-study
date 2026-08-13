@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.tfidf_complement_nb import (
+    evaluate_tfidf_complement_nb,
+)
 from consumerbr_resolution.tfidf_metadata_history_sgd import (
     evaluate_tfidf_metadata_history_sgd,
 )
@@ -146,6 +149,11 @@ STAGES = [
         command="tfidf-metadata-history-sgd",
         name="Evaluate TF-IDF metadata and company history with SGD",
         function=evaluate_tfidf_metadata_history_sgd,
+    ),
+    Stage(
+        command="tfidf-complement-nb",
+        name="Evaluate TF-IDF with ComplementNB",
+        function=evaluate_tfidf_complement_nb,
     ),
 ]
 
