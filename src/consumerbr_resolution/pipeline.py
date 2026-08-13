@@ -4,6 +4,7 @@ from typing import Callable
 from consumerbr_resolution.convert import convert_corpus_to_parquet
 from consumerbr_resolution.download import download_corpus
 from consumerbr_resolution.extract import extract_corpus
+from consumerbr_resolution.modeling_base import build_modeling_base
 
 
 @dataclass(frozen=True)
@@ -28,6 +29,11 @@ STAGES = [
         command="convert",
         name="Convert ConsumerBR CSV to Parquet",
         function=convert_corpus_to_parquet,
+    ),
+    Stage(
+        command="modeling-base",
+        name="Build binary modeling base",
+        function=build_modeling_base,
     ),
 ]
 
