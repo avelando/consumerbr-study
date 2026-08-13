@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.tfidf_sgd import (
+    evaluate_tfidf_sgd,
+)
 from consumerbr_resolution.tfidf import (
     fit_tfidf_vectorizers,
 )
@@ -98,6 +101,11 @@ STAGES = [
         command="tfidf",
         name="Fit fold-specific TF-IDF vectorizers",
         function=fit_tfidf_vectorizers,
+    ),
+    Stage(
+        command="tfidf-sgd",
+        name="Evaluate TF-IDF with SGD",
+        function=evaluate_tfidf_sgd,
     ),
 ]
 

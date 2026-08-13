@@ -9,6 +9,8 @@ PROCESSED_DATA_DIR = DATA_DIR / "processed"
 
 MODELS_DIR = PROJECT_ROOT / "models"
 TFIDF_MODELS_DIR = MODELS_DIR / "tfidf"
+CLASSICAL_MODELS_DIR = MODELS_DIR / "classical"
+TFIDF_SGD_MODELS_DIR = CLASSICAL_MODELS_DIR / "tfidf_sgd"
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 METRICS_DIR = RESULTS_DIR / "metrics"
@@ -134,6 +136,14 @@ TFIDF_STRIP_ACCENTS = "unicode"
 TFIDF_LOWERCASE = True
 TFIDF_BATCH_SIZE = 10_000
 
+RANDOM_SEED = 42
+
+SGD_LOSS = "log_loss"
+SGD_PENALTY = "l2"
+SGD_ALPHA = 1e-5
+SGD_EPOCHS = 5
+SGD_BATCH_SIZE = 10_000
+
 def create_project_directories():
     directories = [
         RAW_DATA_DIR,
@@ -141,6 +151,8 @@ def create_project_directories():
         PROCESSED_DATA_DIR,
         MODELS_DIR,
         TFIDF_MODELS_DIR,
+        CLASSICAL_MODELS_DIR,
+        TFIDF_SGD_MODELS_DIR,
         METRICS_DIR,
         PREDICTIONS_DIR,
         TABLES_DIR,
