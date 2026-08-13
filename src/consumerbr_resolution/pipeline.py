@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.final_consolidation import (
+    consolidate_final_results,
+)
 from consumerbr_resolution.statistical_robustness import (
     analyze_statistical_robustness,
 )
@@ -218,6 +221,11 @@ STAGES = [
         command="statistical-robustness",
         name="Analyze statistical robustness",
         function=analyze_statistical_robustness,
+    ),
+    Stage(
+        command="final-results",
+        name="Consolidate final experimental results",
+        function=consolidate_final_results,
     ),
 ]
 
