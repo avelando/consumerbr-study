@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.company_history import (
+    build_company_history_features,
+)
 from consumerbr_resolution.tfidf_metadata_sgd import (
     evaluate_tfidf_metadata_sgd,
 )
@@ -130,6 +133,11 @@ STAGES = [
         command="tfidf-metadata-sgd",
         name="Evaluate TF-IDF with metadata using SGD",
         function=evaluate_tfidf_metadata_sgd,
+    ),
+    Stage(
+        command="company-history",
+        name="Build causal company history features",
+        function=build_company_history_features,
     ),
 ]
 
