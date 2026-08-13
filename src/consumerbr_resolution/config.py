@@ -8,6 +8,7 @@ INTERIM_DATA_DIR = DATA_DIR / "interim"
 PROCESSED_DATA_DIR = DATA_DIR / "processed"
 
 MODELS_DIR = PROJECT_ROOT / "models"
+TFIDF_MODELS_DIR = MODELS_DIR / "tfidf"
 
 RESULTS_DIR = PROJECT_ROOT / "results"
 METRICS_DIR = RESULTS_DIR / "metrics"
@@ -124,12 +125,22 @@ TEMPORAL_FOLDS = (
     },
 )
 
+TFIDF_NGRAM_RANGE = (1, 2)
+TFIDF_MIN_DF = 5
+TFIDF_MAX_DF = 0.90
+TFIDF_MAX_FEATURES = 100_000
+TFIDF_SUBLINEAR_TF = True
+TFIDF_STRIP_ACCENTS = "unicode"
+TFIDF_LOWERCASE = True
+TFIDF_BATCH_SIZE = 10_000
+
 def create_project_directories():
     directories = [
         RAW_DATA_DIR,
         INTERIM_DATA_DIR,
         PROCESSED_DATA_DIR,
         MODELS_DIR,
+        TFIDF_MODELS_DIR,
         METRICS_DIR,
         PREDICTIONS_DIR,
         TABLES_DIR,

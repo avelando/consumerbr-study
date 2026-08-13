@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.tfidf import (
+    fit_tfidf_vectorizers,
+)
 from consumerbr_resolution.baselines import (
     evaluate_historical_baselines,
 )
@@ -90,6 +93,11 @@ STAGES = [
         command="baselines",
         name="Evaluate historical baselines",
         function=evaluate_historical_baselines,
+    ),
+    Stage(
+        command="tfidf",
+        name="Fit fold-specific TF-IDF vectorizers",
+        function=fit_tfidf_vectorizers,
     ),
 ]
 
