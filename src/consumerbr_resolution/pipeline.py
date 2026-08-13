@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.characterize import characterize_dataset
 from consumerbr_resolution.clean import clean_modeling_base
 from consumerbr_resolution.convert import convert_corpus_to_parquet
 from consumerbr_resolution.download import download_corpus
@@ -46,6 +47,11 @@ STAGES = [
         command="features",
         name="Build deterministic pre-response features",
         function=build_feature_base,
+    ),
+    Stage(
+        command="characterize",
+        name="Characterize experimental dataset",
+        function=characterize_dataset,
     ),
 ]
 
