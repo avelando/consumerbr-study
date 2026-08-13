@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.bertimbau_tokens import (
+    build_bertimbau_token_cache,
+)
 from consumerbr_resolution.bertimbau_assets import (
     prepare_bertimbau_assets,
 )
@@ -170,6 +173,11 @@ STAGES = [
         command="bertimbau-assets",
         name="Prepare BERTimbau pretrained assets",
         function=prepare_bertimbau_assets,
+    ),
+    Stage(
+        command="bertimbau-tokens",
+        name="Build BERTimbau token cache",
+        function=build_bertimbau_token_cache,
     ),
 ]
 
