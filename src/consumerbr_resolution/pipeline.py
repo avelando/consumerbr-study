@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.bertimbau_finetuning import (
+    evaluate_bertimbau,
+)
 from consumerbr_resolution.bertimbau_tokens import (
     build_bertimbau_token_cache,
 )
@@ -178,6 +181,11 @@ STAGES = [
         command="bertimbau-tokens",
         name="Build BERTimbau token cache",
         function=build_bertimbau_token_cache,
+    ),
+    Stage(
+        command="bertimbau",
+        name="Evaluate BERTimbau temporal fine-tuning",
+        function=evaluate_bertimbau,
     ),
 ]
 
