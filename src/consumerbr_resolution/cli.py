@@ -1,6 +1,11 @@
 import argparse
 
-from consumerbr_resolution.pipeline import STAGES, run_all, run_stage
+from consumerbr_resolution.pipeline import (
+    STAGES,
+    run_all,
+    run_stage_by_command,
+    run_stage_by_number,
+)
 
 
 def show_menu():
@@ -9,8 +14,8 @@ def show_menu():
         print("ConsumerBR Resolution Prediction")
         print()
 
-        for stage_number, (stage_name, _) in enumerate(STAGES, start=1):
-            print(f"{stage_number}. {stage_name}")
+        for stage_number, stage in enumerate(STAGES, start=1):
+            print(f"{stage_number}. {stage.name}")
 
         print("A. Run all available stages")
         print("0. Exit")
@@ -29,19 +34,21 @@ def show_menu():
             stage_number = int(option)
 
             if 1 <= stage_number <= len(STAGES):
-                run_stage(stage_number)
+                run_stage_by_number(stage_number)
                 continue
 
         print("Invalid option.")
 
 
 def main():
+    stage_commands = [stage.command for stage in STAGES]
+
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         "command",
         nargs="?",
-        choices=["menu", "download", "all"],
+        choices=["menu", "all", *stage_commands],
         default="menu",
     )
 
@@ -49,7 +56,7 @@ def main():
 
     if args.command == "menu":
         show_menu()
-    elif args.command == "download":
-        run_stage(1)
     elif args.command == "all":
         run_all()
+    else:
+        run_stage_by_command(args.command)

@@ -1,31 +1,56 @@
+from dataclasses import dataclass
+from typing import Callable
+
 from consumerbr_resolution.download import download_corpus
+from consumerbr_resolution.extract import extract_corpus
+
+
+@dataclass(frozen=True)
+class Stage:
+    command: str
+    name: str
+    function: Callable[[], None]
 
 
 STAGES = [
-    ("Download ConsumerBR corpus", download_corpus),
+    Stage(
+        command="download",
+        name="Download ConsumerBR corpus",
+        function=download_corpus,
+    ),
+    Stage(
+        command="extract",
+        name="Extract ConsumerBR corpus",
+        function=extract_corpus,
+    ),
 ]
 
 
-def run_stage(stage_number):
+def execute_stage(stage_number, stage):
+    print()
+    print(f"Running stage {stage_number}: {stage.name}")
+    print()
+
+    stage.function()
+
+
+def run_stage_by_number(stage_number):
     if stage_number < 1 or stage_number > len(STAGES):
         raise ValueError("Invalid stage number.")
 
-    stage_name, stage_function = STAGES[stage_number - 1]
+    stage = STAGES[stage_number - 1]
+    execute_stage(stage_number, stage)
 
-    print()
-    print(f"Running stage {stage_number}: {stage_name}")
-    print()
 
-    stage_function()
+def run_stage_by_command(command):
+    for stage_number, stage in enumerate(STAGES, start=1):
+        if stage.command == command:
+            execute_stage(stage_number, stage)
+            return
+
+    raise ValueError(f"Unknown stage command: {command}")
 
 
 def run_all():
-    for stage_number, (stage_name, stage_function) in enumerate(
-        STAGES,
-        start=1,
-    ):
-        print()
-        print(f"Running stage {stage_number}: {stage_name}")
-        print()
-
-        stage_function()
+    for stage_number, stage in enumerate(STAGES, start=1):
+        execute_stage(stage_number, stage)
