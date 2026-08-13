@@ -4,6 +4,7 @@ import duckdb
 
 from consumerbr_resolution.config import (
     COMPANY_HISTORY_DIR,
+    COMPANY_HISTORY_WINDOWS_DAYS,
     FEATURE_BASE_PATH,
     TABLES_DIR,
     TEMPORAL_FOLDS,
@@ -25,6 +26,156 @@ SUMMARY_FIELDS = [
     "mean_company_history_rate",
     "mean_global_history_rate",
 ]
+
+
+def build_train_recent_history_columns():
+    columns = []
+
+    for days in COMPANY_HISTORY_WINDOWS_DAYS:
+        columns.extend(
+            [
+                f"""
+                COALESCE(
+                    SUM(daily_count) OVER (
+                        PARTITION BY company
+                        ORDER BY opening_date
+                        RANGE BETWEEN
+                            INTERVAL {days} DAY PRECEDING
+                            AND INTERVAL 1 DAY PRECEDING
+                    ),
+                    0
+                ) AS prior_company_count_{days}d
+                """,
+                f"""
+                COALESCE(
+                    SUM(daily_resolved) OVER (
+                        PARTITION BY company
+                        ORDER BY opening_date
+                        RANGE BETWEEN
+                            INTERVAL {days} DAY PRECEDING
+                            AND INTERVAL 1 DAY PRECEDING
+                    ),
+                    0
+                ) AS prior_company_resolved_{days}d
+                """,
+            ]
+        )
+
+    return ",\n".join(columns)
+
+
+def build_train_recent_output_columns():
+    columns = []
+
+    for days in COMPANY_HISTORY_WINDOWS_DAYS:
+        columns.extend(
+            [
+                f"""
+                CAST(
+                    company_history.prior_company_count_{days}d
+                    AS BIGINT
+                ) AS company_history_count_{days}d
+                """,
+                f"""
+                LN(
+                    1
+                    + company_history.prior_company_count_{days}d
+                ) AS log_company_history_count_{days}d
+                """,
+                f"""
+                CASE
+                    WHEN
+                        company_history.prior_company_count_{days}d > 0
+                        THEN
+                            company_history.prior_company_resolved_{days}d
+                            * 1.0
+                            / company_history.prior_company_count_{days}d
+                    WHEN
+                        company_history.prior_company_count > 0
+                        THEN
+                            company_history.prior_company_resolved
+                            * 1.0
+                            / company_history.prior_company_count
+                    WHEN
+                        global_history.prior_global_count > 0
+                        THEN
+                            global_history.prior_global_resolved
+                            * 1.0
+                            / global_history.prior_global_count
+                    ELSE 0.5
+                END AS company_history_rate_{days}d
+                """,
+            ]
+        )
+
+    return ",\n".join(columns)
+
+
+def build_future_recent_aggregate_columns(
+    train_end,
+):
+    columns = []
+
+    for days in COMPANY_HISTORY_WINDOWS_DAYS:
+        columns.extend(
+            [
+                f"""
+                COUNT(*) FILTER (
+                    WHERE
+                        opening_date
+                        > DATE '{train_end}'
+                            - INTERVAL {days} DAY
+                ) AS company_history_count_{days}d
+                """,
+                f"""
+                AVG(target_resolved) FILTER (
+                    WHERE
+                        opening_date
+                        > DATE '{train_end}'
+                            - INTERVAL {days} DAY
+                ) AS company_history_rate_{days}d
+                """,
+            ]
+        )
+
+    return ",\n".join(columns)
+
+
+def build_future_recent_output_columns():
+    columns = []
+
+    for days in COMPANY_HISTORY_WINDOWS_DAYS:
+        columns.extend(
+            [
+                f"""
+                CAST(
+                    COALESCE(
+                        company_history.company_history_count_{days}d,
+                        0
+                    )
+                    AS BIGINT
+                ) AS company_history_count_{days}d
+                """,
+                f"""
+                LN(
+                    1
+                    + COALESCE(
+                        company_history.company_history_count_{days}d,
+                        0
+                    )
+                ) AS log_company_history_count_{days}d
+                """,
+                f"""
+                COALESCE(
+                    company_history.company_history_rate_{days}d,
+                    company_history.company_history_rate,
+                    global_history.global_history_rate
+                ) AS company_history_rate_{days}d
+                """,
+            ]
+        )
+
+    return ",\n".join(columns)
 
 
 def get_split_path(
@@ -53,6 +204,24 @@ def write_train_history(
     target_path = str(
         temporary_path
     ).replace("'", "''")
+
+    recent_history_columns = (
+        build_train_recent_history_columns()
+    )
+
+    recent_output_columns = (
+        build_train_recent_output_columns()
+    )
+
+    recent_aggregate_columns = (
+        build_future_recent_aggregate_columns(
+            train_end=train_end,
+        )
+    )
+
+    recent_output_columns = (
+        build_future_recent_output_columns()
+    )
 
     connection.execute(
         f"""
@@ -83,7 +252,7 @@ def write_train_history(
                     company,
                     opening_date,
                     COALESCE(
-                        SUM(daily_count) OVER (
+                        SUM(daily_resolved) OVER (
                             PARTITION BY company
                             ORDER BY opening_date
                             ROWS BETWEEN
@@ -91,7 +260,8 @@ def write_train_history(
                                 AND 1 PRECEDING
                         ),
                         0
-                    ) AS prior_company_count,
+                    ) AS prior_company_resolved,
+                    {recent_history_columns}
                     COALESCE(
                         SUM(daily_resolved) OVER (
                             PARTITION BY company
@@ -177,7 +347,8 @@ def write_train_history(
                             * 1.0
                             / global_history.prior_global_count
                     ELSE 0.5
-                END AS global_history_rate
+                END AS global_history_rate,
+                {recent_output_columns}
             FROM base
             JOIN company_history
                 ON
@@ -233,7 +404,8 @@ def write_future_history(
                     company,
                     COUNT(*) AS company_history_count,
                     AVG(target_resolved)
-                        AS company_history_rate
+                        AS company_history_rate,
+                    {recent_aggregate_columns}
                 FROM read_parquet('{source_path}')
                 WHERE opening_date <= DATE '{train_end}'
                 GROUP BY company
@@ -278,6 +450,8 @@ def write_future_history(
                 END AS company_seen_before,
                 global_history.global_history_rate
                     AS global_history_rate
+                ,
+                {recent_output_columns}
             FROM read_parquet('{source_path}')
                 AS data
             CROSS JOIN global_history
