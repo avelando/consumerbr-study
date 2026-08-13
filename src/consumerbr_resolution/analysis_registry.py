@@ -111,10 +111,34 @@ MODEL_PREDICTION_SPECS = (
         "prediction_column": "prediction",
     },
     {
+        "model": "albertina",
+        "directory": (
+            PREDICTIONS_DIR
+            / "albertina"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
         "model": "bertimbau_catboost_fusion",
         "directory": (
             PREDICTIONS_DIR
             / "bertimbau_catboost_fusion"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
+        "model": "albertina_catboost_fusion",
+        "directory": (
+            PREDICTIONS_DIR
+            / "albertina_catboost_fusion"
         ),
         "filename": (
             "fold_{fold:02d}_test.parquet"

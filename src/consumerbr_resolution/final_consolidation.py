@@ -87,7 +87,11 @@ METRIC_SOURCE_PATHS = (
     METRICS_DIR
     / "bertimbau_metrics.csv",
     METRICS_DIR
+    / "albertina_metrics.csv",
+    METRICS_DIR
     / "bertimbau_catboost_fusion_metrics.csv",
+    METRICS_DIR
+    / "albertina_catboost_fusion_metrics.csv",
 )
 
 
@@ -148,9 +152,14 @@ ABLATION_COMPARISONS = (
         "tfidf_metadata_history_sgd",
     ),
     (
-        "tabular_fusion",
+        "bertimbau_tabular_fusion",
         "bertimbau",
         "bertimbau_catboost_fusion",
+    ),
+    (
+        "albertina_tabular_fusion",
+        "albertina",
+        "albertina_catboost_fusion",
     ),
 )
 
