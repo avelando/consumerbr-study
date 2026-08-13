@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.bertimbau_catboost_fusion import (
+    evaluate_bertimbau_catboost_fusion,
+)
 from consumerbr_resolution.bertimbau_finetuning import (
     evaluate_bertimbau,
 )
@@ -186,6 +189,11 @@ STAGES = [
         command="bertimbau",
         name="Evaluate BERTimbau temporal fine-tuning",
         function=evaluate_bertimbau,
+    ),
+    Stage(
+        command="bertimbau-catboost-fusion",
+        name="Evaluate BERTimbau and CatBoost late fusion",
+        function=evaluate_bertimbau_catboost_fusion,
     ),
 ]
 
