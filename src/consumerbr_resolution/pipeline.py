@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.convert import convert_corpus_to_parquet
 from consumerbr_resolution.download import download_corpus
 from consumerbr_resolution.extract import extract_corpus
 
@@ -22,6 +23,11 @@ STAGES = [
         command="extract",
         name="Extract ConsumerBR corpus",
         function=extract_corpus,
+    ),
+    Stage(
+        command="convert",
+        name="Convert ConsumerBR CSV to Parquet",
+        function=convert_corpus_to_parquet,
     ),
 ]
 
