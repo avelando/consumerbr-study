@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.risk_calibration_analysis import (
+    analyze_risk_and_calibration,
+)
 from consumerbr_resolution.generalization_analysis import (
     analyze_generalization,
 )
@@ -202,6 +205,11 @@ STAGES = [
         command="generalization",
         name="Analyze temporal and company generalization",
         function=analyze_generalization,
+    ),
+    Stage(
+        command="risk-calibration",
+        name="Analyze risk ranking and calibration",
+        function=analyze_risk_and_calibration,
     ),
 ]
 
