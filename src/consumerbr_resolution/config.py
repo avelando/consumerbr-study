@@ -25,12 +25,14 @@ CORPUS_CSV_NAME = "ConsumerBR.csv"
 CORPUS_PARQUET_NAME = "ConsumerBR.parquet"
 MODELING_BASE_NAME = "consumerbr_modeling_base.parquet"
 CLEAN_BASE_NAME = "consumerbr_clean_base.parquet"
+FEATURE_BASE_NAME = "consumerbr_feature_base.parquet"
 
 CORPUS_ARCHIVE_PATH = RAW_DATA_DIR / CORPUS_ARCHIVE_NAME
 CORPUS_CSV_PATH = RAW_DATA_DIR / CORPUS_CSV_NAME
 CORPUS_PARQUET_PATH = INTERIM_DATA_DIR / CORPUS_PARQUET_NAME
 MODELING_BASE_PATH = PROCESSED_DATA_DIR / MODELING_BASE_NAME
 CLEAN_BASE_PATH = PROCESSED_DATA_DIR / CLEAN_BASE_NAME
+FEATURE_BASE_PATH = PROCESSED_DATA_DIR / FEATURE_BASE_NAME
 
 RESOLVED_STATUS = "Resolvido"
 UNRESOLVED_STATUS = "Não Resolvido"
@@ -41,6 +43,35 @@ MIN_TEXT_WORDS = 2
 DOWNLOAD_CHUNK_SIZE = 1024 * 1024
 REQUEST_TIMEOUT = 120
 
+VALID_UFS = (
+    "AC",
+    "AL",
+    "AP",
+    "AM",
+    "BA",
+    "CE",
+    "DF",
+    "ES",
+    "GO",
+    "MA",
+    "MT",
+    "MS",
+    "MG",
+    "PA",
+    "PB",
+    "PR",
+    "PE",
+    "PI",
+    "RJ",
+    "RN",
+    "RS",
+    "RO",
+    "RR",
+    "SC",
+    "SP",
+    "SE",
+    "TO",
+)
 
 def create_project_directories():
     directories = [

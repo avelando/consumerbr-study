@@ -6,6 +6,7 @@ from consumerbr_resolution.convert import convert_corpus_to_parquet
 from consumerbr_resolution.download import download_corpus
 from consumerbr_resolution.extract import extract_corpus
 from consumerbr_resolution.modeling_base import build_modeling_base
+from consumerbr_resolution.features import build_feature_base
 
 
 @dataclass(frozen=True)
@@ -40,6 +41,11 @@ STAGES = [
         command="clean",
         name="Clean modeling base",
         function=clean_modeling_base,
+    ),
+    Stage(
+        command="features",
+        name="Build deterministic pre-response features",
+        function=build_feature_base,
     ),
 ]
 
