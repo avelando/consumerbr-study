@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.selection_bias import (
+    analyze_outcome_observation,
+)
 from consumerbr_resolution.characterize import characterize_dataset
 from consumerbr_resolution.clean import clean_modeling_base
 from consumerbr_resolution.convert import convert_corpus_to_parquet
@@ -52,6 +55,11 @@ STAGES = [
         command="characterize",
         name="Characterize experimental dataset",
         function=characterize_dataset,
+    ),
+    Stage(
+        command="selection-bias",
+        name="Analyze outcome observation patterns",
+        function=analyze_outcome_observation,
     ),
 ]
 
