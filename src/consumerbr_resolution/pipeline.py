@@ -1,19 +1,36 @@
 from dataclasses import dataclass
 from typing import Callable
 
-from consumerbr_resolution.temporal_protocol import (
-    build_temporal_protocol,
+from consumerbr_resolution.baselines import (
+    evaluate_historical_baselines,
+)
+from consumerbr_resolution.characterize import (
+    characterize_dataset,
+)
+from consumerbr_resolution.clean import (
+    clean_modeling_base,
+)
+from consumerbr_resolution.convert import (
+    convert_corpus_to_parquet,
+)
+from consumerbr_resolution.download import (
+    download_corpus,
+)
+from consumerbr_resolution.extract import (
+    extract_corpus,
+)
+from consumerbr_resolution.features import (
+    build_feature_base,
+)
+from consumerbr_resolution.modeling_base import (
+    build_modeling_base,
 )
 from consumerbr_resolution.selection_bias import (
     analyze_outcome_observation,
 )
-from consumerbr_resolution.characterize import characterize_dataset
-from consumerbr_resolution.clean import clean_modeling_base
-from consumerbr_resolution.convert import convert_corpus_to_parquet
-from consumerbr_resolution.download import download_corpus
-from consumerbr_resolution.extract import extract_corpus
-from consumerbr_resolution.modeling_base import build_modeling_base
-from consumerbr_resolution.features import build_feature_base
+from consumerbr_resolution.temporal_protocol import (
+    build_temporal_protocol,
+)
 
 
 @dataclass(frozen=True)
@@ -68,6 +85,11 @@ STAGES = [
         command="temporal-protocol",
         name="Build temporal evaluation protocol",
         function=build_temporal_protocol,
+    ),
+    Stage(
+        command="baselines",
+        name="Evaluate historical baselines",
+        function=evaluate_historical_baselines,
     ),
 ]
 
