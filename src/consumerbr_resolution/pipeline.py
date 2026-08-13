@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.tabular_catboost import (
+    evaluate_catboost,
+)
 from consumerbr_resolution.tfidf_complement_nb import (
     evaluate_tfidf_complement_nb,
 )
@@ -154,6 +157,11 @@ STAGES = [
         command="tfidf-complement-nb",
         name="Evaluate TF-IDF with ComplementNB",
         function=evaluate_tfidf_complement_nb,
+    ),
+    Stage(
+        command="catboost",
+        name="Evaluate CatBoost tabular model",
+        function=evaluate_catboost,
     ),
 ]
 
