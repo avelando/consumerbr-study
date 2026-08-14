@@ -31,6 +31,9 @@ from consumerbr_resolution.config import (
     TEMPORAL_FOLDS,
     create_project_directories,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_catboost_hyperparameters,
+)
 from consumerbr_resolution.evaluation import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
@@ -79,6 +82,10 @@ METRIC_FIELDS = [
     "threshold_source",
     "threshold",
     "best_iteration",
+    "iterations",
+    "learning_rate",
+    "depth",
+    "l2_leaf_reg",
     "training_seconds",
     "scoring_seconds",
     "accuracy",
@@ -210,19 +217,43 @@ def create_prediction_pool(
     )
 
 
-def create_classifier():
+def create_classifier(
+    parameters=None,
+    random_seed=RANDOM_SEED,
+):
+    if parameters is None:
+        parameters = (
+            get_selected_catboost_hyperparameters()
+        )
+
     return CatBoostClassifier(
-        iterations=CATBOOST_ITERATIONS,
-        learning_rate=(
-            CATBOOST_LEARNING_RATE
+        iterations=int(
+            parameters.get(
+                "iterations",
+                CATBOOST_ITERATIONS,
+            )
         ),
-        depth=CATBOOST_DEPTH,
-        l2_leaf_reg=(
-            CATBOOST_L2_LEAF_REG
+        learning_rate=float(
+            parameters.get(
+                "learning_rate",
+                CATBOOST_LEARNING_RATE,
+            )
+        ),
+        depth=int(
+            parameters.get(
+                "depth",
+                CATBOOST_DEPTH,
+            )
+        ),
+        l2_leaf_reg=float(
+            parameters.get(
+                "l2_leaf_reg",
+                CATBOOST_L2_LEAF_REG,
+            )
         ),
         loss_function="Logloss",
         eval_metric="Logloss",
-        random_seed=RANDOM_SEED,
+        random_seed=random_seed,
         task_type=CATBOOST_TASK_TYPE,
         devices=CATBOOST_DEVICES,
         gpu_ram_part=(
@@ -371,6 +402,10 @@ def evaluate_catboost():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    parameters = (
+        get_selected_catboost_hyperparameters()
+    )
+
     print(
         "Evaluating CatBoost tabular model"
     )
@@ -474,7 +509,9 @@ def evaluate_catboost():
                 )
             )
 
-            model = create_classifier()
+            model = create_classifier(
+                parameters=parameters
+            )
 
             start_time = (
                 time.perf_counter()
@@ -603,6 +640,16 @@ def evaluate_catboost():
                     "best_iteration": (
                         best_iteration
                     ),
+                    "iterations": (
+                        parameters["iterations"]
+                    ),
+                    "learning_rate": (
+                        parameters["learning_rate"]
+                    ),
+                    "depth": parameters["depth"],
+                    "l2_leaf_reg": (
+                        parameters["l2_leaf_reg"]
+                    ),
                     "training_seconds": (
                         training_seconds
                     ),
@@ -620,6 +667,16 @@ def evaluate_catboost():
                     ),
                     "best_iteration": (
                         best_iteration
+                    ),
+                    "iterations": (
+                        parameters["iterations"]
+                    ),
+                    "learning_rate": (
+                        parameters["learning_rate"]
+                    ),
+                    "depth": parameters["depth"],
+                    "l2_leaf_reg": (
+                        parameters["l2_leaf_reg"]
                     ),
                     "training_seconds": (
                         training_seconds

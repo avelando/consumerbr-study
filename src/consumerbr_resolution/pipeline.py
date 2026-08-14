@@ -46,6 +46,9 @@ from consumerbr_resolution.transformer_length_finetuning import (
     evaluate_bertimbau_head_512,
     evaluate_bertimbau_head_tail_256,
 )
+from consumerbr_resolution.compact_catboost_tuning import (
+    tune_catboost_hyperparameters,
+)
 from consumerbr_resolution.tabular_catboost import (
     evaluate_catboost,
 )
@@ -237,6 +240,11 @@ STAGES = [
         command="tfidf-complement-nb",
         name="Evaluate TF-IDF with ComplementNB",
         function=evaluate_tfidf_complement_nb,
+    ),
+    Stage(
+        command="catboost-tuning",
+        name="Tune CatBoost hyperparameters",
+        function=tune_catboost_hyperparameters,
     ),
     Stage(
         command="catboost",

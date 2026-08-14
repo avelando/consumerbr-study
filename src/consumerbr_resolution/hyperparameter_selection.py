@@ -39,3 +39,32 @@ def get_selected_complement_nb_alpha():
             "complement_nb"
         ]["alpha"]
     )
+
+
+def get_selected_catboost_hyperparameters():
+    parameters = (
+        load_selected_hyperparameters()
+    )
+
+    if "catboost" not in parameters:
+        raise KeyError(
+            "Selected CatBoost hyperparameters were not found. "
+            "Run the CatBoost tuning stage first."
+        )
+
+    selected = parameters["catboost"]
+
+    return {
+        "iterations": int(
+            selected["iterations"]
+        ),
+        "learning_rate": float(
+            selected["learning_rate"]
+        ),
+        "depth": int(
+            selected["depth"]
+        ),
+        "l2_leaf_reg": float(
+            selected["l2_leaf_reg"]
+        ),
+    }

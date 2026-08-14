@@ -126,6 +126,11 @@ CLASSICAL_TUNING_RESULTS_PATH = (
     / "classical_tuning_results.csv"
 )
 
+CATBOOST_TUNING_RESULTS_PATH = (
+    TABLES_DIR
+    / "catboost_tuning_results.csv"
+)
+
 SELECTED_HYPERPARAMETERS_PATH = (
     TABLES_DIR
     / "selected_hyperparameters.json"
@@ -151,6 +156,16 @@ CLEAN_BASE_PATH = PROCESSED_DATA_DIR / CLEAN_BASE_NAME
 FEATURE_BASE_PATH = PROCESSED_DATA_DIR / FEATURE_BASE_NAME
 
 COMPANY_HISTORY_DIR = PROCESSED_DATA_DIR / "company_history"
+
+CATBOOST_TUNING_TRAIN_HISTORY_PATH = (
+    COMPANY_HISTORY_DIR
+    / "catboost_tuning_train.parquet"
+)
+
+CATBOOST_TUNING_VALIDATION_HISTORY_PATH = (
+    COMPANY_HISTORY_DIR
+    / "catboost_tuning_validation.parquet"
+)
 
 TOKENIZED_DATA_DIR = (
     INTERIM_DATA_DIR / "tokenized"
@@ -290,6 +305,21 @@ COMPLEMENT_NB_ALPHA_CANDIDATES = (
     0.1,
     0.5,
     1.0,
+)
+
+CATBOOST_DEPTH_CANDIDATES = (
+    6,
+    8,
+)
+
+CATBOOST_LEARNING_RATE_CANDIDATES = (
+    0.03,
+    0.05,
+)
+
+CATBOOST_L2_LEAF_REG_CANDIDATES = (
+    3.0,
+    10.0,
 )
 
 TFIDF_NGRAM_RANGE = (1, 2)
