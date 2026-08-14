@@ -46,6 +46,9 @@ from consumerbr_resolution.tfidf_complement_nb import (
 from consumerbr_resolution.tfidf_metadata_history_sgd import (
     evaluate_tfidf_metadata_history_sgd,
 )
+from consumerbr_resolution.tfidf_metadata_recent_history_sgd import (
+    evaluate_tfidf_metadata_recent_history_sgd,
+)
 from consumerbr_resolution.company_history import (
     build_company_history_features,
 )
@@ -210,6 +213,11 @@ STAGES = [
         command="tfidf-metadata-history-sgd",
         name="Evaluate TF-IDF metadata and company history with SGD",
         function=evaluate_tfidf_metadata_history_sgd,
+    ),
+    Stage(
+        command="tfidf-metadata-recent-history-sgd",
+        name="Evaluate TF-IDF metadata and recent company history with SGD",
+        function=evaluate_tfidf_metadata_recent_history_sgd,
     ),
     Stage(
         command="tfidf-complement-nb",

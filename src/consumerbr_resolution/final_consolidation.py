@@ -85,6 +85,8 @@ METRIC_SOURCE_PATHS = (
     METRICS_DIR
     / "tfidf_metadata_history_sgd_metrics.csv",
     METRICS_DIR
+    / "tfidf_metadata_recent_history_sgd_metrics.csv",
+    METRICS_DIR
     / "tfidf_complement_nb_metrics.csv",
     METRICS_DIR
     / "catboost_metrics.csv",
@@ -169,6 +171,11 @@ ABLATION_COMPARISONS = (
         "company_history",
         "tfidf_metadata_sgd",
         "tfidf_metadata_history_sgd",
+    ),
+    (
+        "recent_company_history",
+        "tfidf_metadata_history_sgd",
+        "tfidf_metadata_recent_history_sgd",
     ),
     (
         "bertimbau_tabular_fusion",

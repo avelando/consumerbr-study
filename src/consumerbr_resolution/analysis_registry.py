@@ -97,6 +97,16 @@ MODEL_PREDICTION_SPECS = (
         "prediction_column": "prediction",
     },
     {
+        "model": "tfidf_metadata_recent_history_sgd",
+        "directory": (
+            PREDICTIONS_DIR
+            / "tfidf_metadata_recent_history_sgd"
+        ),
+        "filename": "fold_{fold:02d}.parquet",
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
         "model": "tfidf_complement_nb",
         "directory": (
             PREDICTIONS_DIR
