@@ -93,7 +93,15 @@ METRIC_SOURCE_PATHS = (
     METRICS_DIR
     / "bertimbau_metrics.csv",
     METRICS_DIR
+    / "bertimbau_head_tail_256_metrics.csv",
+    METRICS_DIR
+    / "bertimbau_head_512_metrics.csv",
+    METRICS_DIR
     / "albertina_metrics.csv",
+    METRICS_DIR
+    / "albertina_head_tail_256_metrics.csv",
+    METRICS_DIR
+    / "albertina_head_512_metrics.csv",
     METRICS_DIR
     / "bertimbau_catboost_fusion_metrics.csv",
     METRICS_DIR
@@ -176,6 +184,26 @@ ABLATION_COMPARISONS = (
         "recent_company_history",
         "tfidf_metadata_history_sgd",
         "tfidf_metadata_recent_history_sgd",
+    ),
+    (
+        "bertimbau_head_tail_256",
+        "bertimbau",
+        "bertimbau_head_tail_256",
+    ),
+    (
+        "bertimbau_head_512",
+        "bertimbau",
+        "bertimbau_head_512",
+    ),
+    (
+        "albertina_head_tail_256",
+        "albertina",
+        "albertina_head_tail_256",
+    ),
+    (
+        "albertina_head_512",
+        "albertina",
+        "albertina_head_512",
     ),
     (
         "bertimbau_tabular_fusion",

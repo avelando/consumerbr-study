@@ -141,10 +141,58 @@ MODEL_PREDICTION_SPECS = (
         "prediction_column": "prediction",
     },
     {
+        "model": "bertimbau_head_tail_256",
+        "directory": (
+            PREDICTIONS_DIR
+            / "bertimbau_head_tail_256"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
+        "model": "bertimbau_head_512",
+        "directory": (
+            PREDICTIONS_DIR
+            / "bertimbau_head_512"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
         "model": "albertina",
         "directory": (
             PREDICTIONS_DIR
             / "albertina"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
+        "model": "albertina_head_tail_256",
+        "directory": (
+            PREDICTIONS_DIR
+            / "albertina_head_tail_256"
+        ),
+        "filename": (
+            "fold_{fold:02d}_test.parquet"
+        ),
+        "score_column": "score",
+        "prediction_column": "prediction",
+    },
+    {
+        "model": "albertina_head_512",
+        "directory": (
+            PREDICTIONS_DIR
+            / "albertina_head_512"
         ),
         "filename": (
             "fold_{fold:02d}_test.parquet"

@@ -411,7 +411,19 @@ def train_model(
     tokenizer,
     device,
     train_document_count,
+    train_batch_size=None,
+    gradient_accumulation_steps=None,
 ):
+    if train_batch_size is None:
+        train_batch_size = (
+            ALBERTINA_TRAIN_BATCH_SIZE
+        )
+
+    if gradient_accumulation_steps is None:
+        gradient_accumulation_steps = (
+            ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+        )
+
     optimizer = AdamW(
         model.parameters(),
         lr=ALBERTINA_LEARNING_RATE,
@@ -422,12 +434,12 @@ def train_model(
 
     batches_per_epoch = math.ceil(
         train_document_count
-        / ALBERTINA_TRAIN_BATCH_SIZE
+        / train_batch_size
     )
 
     optimizer_steps_per_epoch = math.ceil(
         batches_per_epoch
-        / ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+        / gradient_accumulation_steps
     )
 
     total_optimizer_steps = (
@@ -580,7 +592,12 @@ def score_split(
     tokenizer,
     device,
     include_identifiers=False,
+    eval_batch_size=None,
 ):
+    if eval_batch_size is None:
+        eval_batch_size = (
+            ALBERTINA_EVAL_BATCH_SIZE
+        )
     targets = []
     scores = []
 
@@ -602,9 +619,7 @@ def score_split(
             dataset=dataset,
             start_date=start_date,
             end_date=end_date,
-            batch_size=(
-                ALBERTINA_EVAL_BATCH_SIZE
-            ),
+            batch_size=eval_batch_size,
             include_identifiers=(
                 include_identifiers
             ),

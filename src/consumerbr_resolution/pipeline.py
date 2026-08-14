@@ -37,6 +37,12 @@ from consumerbr_resolution.bertimbau_tokens import (
 from consumerbr_resolution.bertimbau_assets import (
     prepare_bertimbau_assets,
 )
+from consumerbr_resolution.transformer_length_finetuning import (
+    evaluate_albertina_head_512,
+    evaluate_albertina_head_tail_256,
+    evaluate_bertimbau_head_512,
+    evaluate_bertimbau_head_tail_256,
+)
 from consumerbr_resolution.tabular_catboost import (
     evaluate_catboost,
 )
@@ -245,6 +251,16 @@ STAGES = [
         function=evaluate_bertimbau,
     ),
     Stage(
+        command="bertimbau-head-tail-256",
+        name="Evaluate BERTimbau head-tail 256 fine-tuning",
+        function=evaluate_bertimbau_head_tail_256,
+    ),
+    Stage(
+        command="bertimbau-head-512",
+        name="Evaluate BERTimbau head 512 fine-tuning",
+        function=evaluate_bertimbau_head_512,
+    ),
+    Stage(
         command="bertimbau-catboost-fusion",
         name="Evaluate BERTimbau and CatBoost late fusion",
         function=evaluate_bertimbau_catboost_fusion,
@@ -263,6 +279,16 @@ STAGES = [
         command="albertina",
         name="Evaluate Albertina temporal fine-tuning",
         function=evaluate_albertina,
+    ),
+    Stage(
+        command="albertina-head-tail-256",
+        name="Evaluate Albertina head-tail 256 fine-tuning",
+        function=evaluate_albertina_head_tail_256,
+    ),
+    Stage(
+        command="albertina-head-512",
+        name="Evaluate Albertina head 512 fine-tuning",
+        function=evaluate_albertina_head_512,
     ),
     Stage(
         command="albertina-catboost-fusion",

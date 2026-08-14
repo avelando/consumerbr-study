@@ -411,7 +411,19 @@ def train_model(
     tokenizer,
     device,
     train_document_count,
+    train_batch_size=None,
+    gradient_accumulation_steps=None,
 ):
+    if train_batch_size is None:
+        train_batch_size = (
+            BERTIMBAU_TRAIN_BATCH_SIZE
+        )
+
+    if gradient_accumulation_steps is None:
+        gradient_accumulation_steps = (
+            BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
+        )
+
     optimizer = AdamW(
         model.parameters(),
         lr=BERTIMBAU_LEARNING_RATE,
@@ -422,12 +434,12 @@ def train_model(
 
     batches_per_epoch = math.ceil(
         train_document_count
-        / BERTIMBAU_TRAIN_BATCH_SIZE
+        / train_batch_size
     )
 
     optimizer_steps_per_epoch = math.ceil(
         batches_per_epoch
-        / BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
+        / gradient_accumulation_steps
     )
 
     total_optimizer_steps = (
@@ -479,9 +491,7 @@ def train_model(
             dataset=dataset,
             start_date=None,
             end_date=train_end,
-            batch_size=(
-                BERTIMBAU_TRAIN_BATCH_SIZE
-            ),
+            batch_size=train_batch_size,
         ):
             batch_index += 1
 
@@ -512,7 +522,7 @@ def train_model(
 
                 loss = (
                     output.loss
-                    / BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
+                    / gradient_accumulation_steps
                 )
 
             scaler.scale(
@@ -521,7 +531,7 @@ def train_model(
 
             should_step = (
                 batch_index
-                % BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
+                % gradient_accumulation_steps
                 == 0
                 or batch_index
                 == batches_per_epoch
@@ -580,7 +590,13 @@ def score_split(
     tokenizer,
     device,
     include_identifiers=False,
+    eval_batch_size=None,
 ):
+    if eval_batch_size is None:
+        eval_batch_size = (
+            BERTIMBAU_EVAL_BATCH_SIZE
+        )
+
     targets = []
     scores = []
 
@@ -602,9 +618,7 @@ def score_split(
             dataset=dataset,
             start_date=start_date,
             end_date=end_date,
-            batch_size=(
-                BERTIMBAU_EVAL_BATCH_SIZE
-            ),
+            batch_size=eval_batch_size,
             include_identifiers=(
                 include_identifiers
             ),
