@@ -862,7 +862,7 @@ def evaluate_variant(
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),

@@ -12,7 +12,6 @@ from consumerbr_resolution.config import (
     METRICS_DIR,
     PREDICTIONS_DIR,
     RANDOM_SEED,
-    SGD_ALPHA,
     SGD_BATCH_SIZE,
     SGD_EPOCHS,
     SGD_LOSS,
@@ -684,7 +683,7 @@ def evaluate_tfidf_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),

@@ -15,7 +15,6 @@ from consumerbr_resolution.config import (
     METRICS_DIR,
     PREDICTIONS_DIR,
     RANDOM_SEED,
-    SGD_ALPHA,
     SGD_BATCH_SIZE,
     SGD_EPOCHS,
     SGD_LOSS,
@@ -609,6 +608,8 @@ def evaluate_tfidf_metadata_sgd():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = get_selected_sgd_alpha()
+
     print("Evaluating TF-IDF + metadata with SGD")
     print(f"Source: {FEATURE_BASE_PATH}")
     print(
@@ -674,7 +675,7 @@ def evaluate_tfidf_metadata_sgd():
                 / f"fold_{fold_number:02d}.joblib"
             )
 
-            model = create_classifier()
+            model = create_classifier(alpha)
 
             train_document_count = (
                 get_document_count(
@@ -766,7 +767,7 @@ def evaluate_tfidf_metadata_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),
@@ -787,7 +788,7 @@ def evaluate_tfidf_metadata_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),
