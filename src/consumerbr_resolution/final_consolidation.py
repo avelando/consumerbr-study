@@ -7,6 +7,7 @@ from consumerbr_resolution.analysis_registry import (
 from consumerbr_resolution.config import (
     FINAL_RESULTS_DIR,
     METRICS_DIR,
+    SEED_STABILITY_SUMMARY_PATH,
     create_project_directories,
 )
 from consumerbr_resolution.generalization_analysis import (
