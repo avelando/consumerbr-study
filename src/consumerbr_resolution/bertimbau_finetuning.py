@@ -956,7 +956,6 @@ def evaluate_bertimbau():
 
             set_random_seed(
                 RANDOM_SEED
-                + fold_number
             )
 
             model = (

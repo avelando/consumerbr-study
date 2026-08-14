@@ -68,6 +68,11 @@ FINAL_SIGNIFICANT_PAIRWISE_PATH = (
     / "final_significant_pairwise_comparisons.csv"
 )
 
+FINAL_SEED_STABILITY_PATH = (
+    FINAL_RESULTS_DIR
+    / "final_seed_stability_summary.csv"
+)
+
 
 METRIC_SOURCE_PATHS = (
     METRICS_DIR
@@ -846,6 +851,7 @@ def consolidate_final_results():
         FINAL_RISK_RANKING_PATH,
         FINAL_CALIBRATION_PATH,
         FINAL_SIGNIFICANT_PAIRWISE_PATH,
+        FINAL_SEED_STABILITY_PATH,
     ]
 
     if all(
@@ -945,6 +951,15 @@ def consolidate_final_results():
 
     significant_pairwise.to_csv(
         FINAL_SIGNIFICANT_PAIRWISE_PATH,
+        index=False,
+    )
+
+    seed_stability = pd.read_csv(
+        SEED_STABILITY_SUMMARY_PATH
+    )
+
+    seed_stability.to_csv(
+        FINAL_SEED_STABILITY_PATH,
         index=False,
     )
 

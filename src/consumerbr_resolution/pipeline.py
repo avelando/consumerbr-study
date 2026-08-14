@@ -34,6 +34,9 @@ from consumerbr_resolution.albertina_catboost_fusion import (
 from consumerbr_resolution.bertimbau_finetuning import (
     evaluate_bertimbau,
 )
+from consumerbr_resolution.seed_stability import (
+    evaluate_seed_stability,
+)
 from consumerbr_resolution.bertimbau_tokens import (
     build_bertimbau_token_cache,
 )
@@ -329,6 +332,11 @@ STAGES = [
         command="generalization",
         name="Analyze temporal and company generalization",
         function=analyze_generalization,
+    ),
+    Stage(
+        command="seed-stability",
+        name="Evaluate main-model seed stability",
+        function=evaluate_seed_stability,
     ),
     Stage(
         command="risk-calibration",

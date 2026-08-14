@@ -276,7 +276,7 @@ def evaluate_transformer_length_variant(
                 fold_metrics_path.unlink()
 
             finetuning_module.set_random_seed(
-                RANDOM_SEED + fold_number
+                RANDOM_SEED
             )
 
             model = (

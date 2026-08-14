@@ -954,7 +954,6 @@ def evaluate_albertina():
 
             set_random_seed(
                 RANDOM_SEED
-                + fold_number
             )
 
             model = (

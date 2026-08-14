@@ -119,6 +119,9 @@ PREDICTIONS_DIR = RESULTS_DIR / "predictions"
 TABLES_DIR = RESULTS_DIR / "tables"
 FIGURES_DIR = RESULTS_DIR / "figures"
 ANALYSIS_DIR = RESULTS_DIR / "analysis"
+SEED_STABILITY_DIR = (
+    ANALYSIS_DIR / "seed_stability"
+)
 FINAL_RESULTS_DIR = RESULTS_DIR / "final"
 
 CLASSICAL_TUNING_RESULTS_PATH = (
@@ -144,6 +147,20 @@ ALBERTINA_TUNING_RESULTS_PATH = (
 SELECTED_HYPERPARAMETERS_PATH = (
     TABLES_DIR
     / "selected_hyperparameters.json"
+)
+SEED_STABILITY_METRICS_PATH = (
+    SEED_STABILITY_DIR
+    / "seed_stability_metrics.csv"
+)
+
+SEED_STABILITY_BY_SEED_PATH = (
+    SEED_STABILITY_DIR
+    / "seed_stability_by_seed.csv"
+)
+
+SEED_STABILITY_SUMMARY_PATH = (
+    SEED_STABILITY_DIR
+    / "seed_stability_summary.csv"
 )
 
 LOGS_DIR = PROJECT_ROOT / "logs"
@@ -364,6 +381,16 @@ TFIDF_CHAR_MAX_FEATURES = 100_000
 
 RANDOM_SEED = 42
 
+EXPERIMENT_SEEDS = (
+    13,
+    21,
+    42,
+)
+
+PRIMARY_EXPERIMENT_SEED = (
+    RANDOM_SEED
+)
+
 SGD_LOSS = "log_loss"
 SGD_PENALTY = "l2"
 SGD_EPOCHS = 5
@@ -518,6 +545,7 @@ def create_project_directories():
         TABLES_DIR,
         FIGURES_DIR,
         ANALYSIS_DIR,
+        SEED_STABILITY_DIR,
         FINAL_RESULTS_DIR,
         LOGS_DIR,
     ]
