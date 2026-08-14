@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools"]
+requires = ["setuptools==84.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,18 +8,18 @@ version = "0.1.0"
 requires-python = ">=3.10"
 dependencies = [
     "catboost==1.2.10",
-    "duckdb",
-    "huggingface-hub",
-    "joblib",
-    "numpy",
-    "pandas",
-    "pyarrow",
-    "requests",
-    "scikit-learn",
-    "scipy",
-    "torch",
-    "transformers",
-    "tqdm"
+    "duckdb==1.5.5",
+    "huggingface-hub==1.27.0",
+    "joblib==1.5.3",
+    "numpy==2.5.2",
+    "pandas==3.0.5",
+    "pyarrow==25.0.1",
+    "requests==2.34.2",
+    "scikit-learn==1.9.0",
+    "scipy==1.18.0",
+    "torch==2.13.0",
+    "transformers==5.15.0",
+    "tqdm==4.70.0"
 ]
 
 [tool.setuptools.packages.find]

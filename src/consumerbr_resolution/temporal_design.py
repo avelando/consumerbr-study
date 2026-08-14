@@ -165,18 +165,37 @@ def validate_temporal_folds(folds):
 
         if fold_number != expected_fold:
             raise ValueError(
-                "Temporal fold numbering "
-                "is not contiguous."
+                "Temporal fold numbering is not contiguous."
             )
 
-        if train_end >= validation_start:
+        if validation_start > validation_end:
             raise ValueError(
-                "Training overlaps validation."
+                "Temporal validation window is invalid."
             )
 
-        if validation_end >= test_start:
+        if test_start > test_end:
             raise ValueError(
-                "Validation overlaps test."
+                "Temporal test window is invalid."
+            )
+
+        if (
+            train_end
+            + timedelta(days=1)
+            != validation_start
+        ):
+            raise ValueError(
+                "Training and validation are not "
+                "temporally contiguous."
+            )
+
+        if (
+            validation_end
+            + timedelta(days=1)
+            != test_start
+        ):
+            raise ValueError(
+                "Validation and test are not "
+                "temporally contiguous."
             )
 
         if (

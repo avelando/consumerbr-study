@@ -9,6 +9,7 @@ from consumerbr_resolution.config import (
     FINAL_RESULTS_DIR,
     METRICS_DIR,
     SEED_STABILITY_SUMMARY_PATH,
+    TEMPORAL_FOLDS,
     create_project_directories,
 )
 from consumerbr_resolution.generalization_analysis import (
@@ -283,6 +284,155 @@ def load_fold_metrics():
     )
 
     return combined
+
+
+def validate_final_fold_metrics(
+    fold_metrics,
+):
+    expected_models = [
+        specification["model"]
+        for specification
+        in MODEL_PREDICTION_SPECS
+    ]
+
+    expected_folds = [
+        fold["fold"]
+        for fold
+        in TEMPORAL_FOLDS
+    ]
+
+    duplicate_mask = (
+        fold_metrics.duplicated(
+            subset=[
+                "model",
+                "fold",
+            ],
+            keep=False,
+        )
+    )
+
+    if duplicate_mask.any():
+        duplicates = (
+            fold_metrics.loc[
+                duplicate_mask,
+                [
+                    "model",
+                    "fold",
+                ],
+            ]
+            .astype(str)
+            .agg(
+                ":fold=".join,
+                axis=1,
+            )
+            .tolist()
+        )
+
+        raise RuntimeError(
+            "Duplicate model-fold "
+            "test metrics were found: "
+            + ", ".join(
+                duplicates
+            )
+        )
+
+    observed_models = set(
+        fold_metrics[
+            "model"
+        ].unique()
+    )
+
+    expected_model_set = set(
+        expected_models
+    )
+
+    missing_models = sorted(
+        expected_model_set
+        - observed_models
+    )
+
+    unexpected_models = sorted(
+        observed_models
+        - expected_model_set
+    )
+
+    if (
+        missing_models
+        or unexpected_models
+    ):
+        raise RuntimeError(
+            "Final model registry mismatch. "
+            f"Missing={missing_models}; "
+            f"unexpected="
+            f"{unexpected_models}."
+        )
+
+    for model_name in (
+        expected_models
+    ):
+        group = fold_metrics[
+            fold_metrics["model"]
+            == model_name
+        ]
+
+        observed_folds = sorted(
+            int(value)
+            for value
+            in group[
+                "fold"
+            ].tolist()
+        )
+
+        if (
+            observed_folds
+            != expected_folds
+        ):
+            raise RuntimeError(
+                f"Model {model_name} does "
+                "not contain exactly one "
+                "test result for every "
+                "temporal fold. "
+                f"Observed="
+                f"{observed_folds}; "
+                f"expected="
+                f"{expected_folds}."
+            )
+
+    bounded_metrics = (
+        "accuracy",
+        "balanced_accuracy",
+        "f1_resolved",
+        "f1_unresolved",
+        "macro_f1",
+        "roc_auc",
+        "pr_auc",
+        "brier_score",
+    )
+
+    for metric in bounded_metrics:
+        values = pd.to_numeric(
+            fold_metrics[metric],
+            errors="coerce",
+        )
+
+        if values.isna().any():
+            raise RuntimeError(
+                "Final test metric "
+                f"{metric} contains "
+                "missing values."
+            )
+
+        invalid = (
+            (values < 0.0)
+            | (values > 1.0)
+        )
+
+        if invalid.any():
+            raise RuntimeError(
+                "Final test metric "
+                f"{metric} contains "
+                "values outside [0, 1]."
+            )
 
 
 def summarize_models(
@@ -880,6 +1030,10 @@ def consolidate_final_results():
     )
 
     fold_metrics = load_fold_metrics()
+
+    validate_final_fold_metrics(
+        fold_metrics=fold_metrics
+    )
 
     model_summary = summarize_models(
         fold_metrics=fold_metrics

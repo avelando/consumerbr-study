@@ -113,6 +113,9 @@ from consumerbr_resolution.extract import (
 from consumerbr_resolution.features import (
     build_feature_base,
 )
+from consumerbr_resolution.dataset_integrity import (
+    validate_dataset_integrity,
+)
 from consumerbr_resolution.modeling_base import (
     build_modeling_base,
 )
@@ -121,6 +124,9 @@ from consumerbr_resolution.selection_bias import (
 )
 from consumerbr_resolution.temporal_protocol import (
     build_temporal_protocol,
+)
+from consumerbr_resolution.reproducibility import (
+    validate_or_create_official_run_manifest,
 )
 from consumerbr_resolution.compact_transformer_tuning import (
     tune_albertina_hyperparameters,
@@ -167,6 +173,11 @@ STAGES = [
         function=build_feature_base,
     ),
     Stage(
+        command="dataset-integrity",
+        name="Validate experimental dataset integrity",
+        function=validate_dataset_integrity,
+    ),
+    Stage(
         command="characterize",
         name="Characterize experimental dataset",
         function=characterize_dataset,
@@ -180,6 +191,16 @@ STAGES = [
         command="temporal-protocol",
         name="Build temporal evaluation protocol",
         function=build_temporal_protocol,
+    ),
+    Stage(
+        command="reproducibility-manifest",
+        name=(
+            "Validate official run and save "
+            "reproducibility manifest"
+        ),
+        function=(
+            validate_or_create_official_run_manifest
+        ),
     ),
     Stage(
         command="baselines",
