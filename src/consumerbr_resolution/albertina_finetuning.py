@@ -491,9 +491,7 @@ def train_model(
             dataset=dataset,
             start_date=None,
             end_date=train_end,
-            batch_size=(
-                ALBERTINA_TRAIN_BATCH_SIZE
-            ),
+            batch_size=train_batch_size,
         ):
             batch_index += 1
 
@@ -524,7 +522,7 @@ def train_model(
 
                 loss = (
                     output.loss
-                    / ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+                    / gradient_accumulation_steps
                 )
 
             scaler.scale(
@@ -533,7 +531,7 @@ def train_model(
 
             should_step = (
                 batch_index
-                % ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+                % gradient_accumulation_steps
                 == 0
                 or batch_index
                 == batches_per_epoch
