@@ -573,14 +573,11 @@ def calibrate_main_model_probabilities():
                 )
             )
 
-            calibrated_threshold = float(
-                apply_platt_calibrator(
-                    calibrator=calibrator,
-                    scores=np.asarray(
-                        [raw_threshold],
-                        dtype=np.float64,
-                    ),
-                )[0]
+            calibrated_threshold, _ = (
+                find_best_macro_f1_threshold(
+                    validation_targets,
+                    calibrated_validation_scores,
+                )
             )
 
             raw_metrics = (
