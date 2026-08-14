@@ -1108,11 +1108,24 @@ def evaluate_albertina():
                     "threshold_source": (
                         "validation_macro_f1"
                     ),
+                    "epochs": (
+                        hyperparameters["epochs"]
+                    ),
                     "train_batch_size": (
                         ALBERTINA_TRAIN_BATCH_SIZE
                     ),
                     "gradient_accumulation_steps": (
                         ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+                    ),
+                    "learning_rate": (
+                        hyperparameters[
+                            "learning_rate"
+                        ]
+                    ),
+                    "weight_decay": (
+                        hyperparameters[
+                            "weight_decay"
+                        ]
                     ),
                     "training_seconds": (
                         training_seconds
@@ -1131,24 +1144,24 @@ def evaluate_albertina():
                     "threshold_source": (
                         "validation_macro_f1"
                     ),
-                    epochs=(
+                    "epochs": (
                         hyperparameters["epochs"]
-                    ),
-                    learning_rate=(
-                        hyperparameters[
-                            "learning_rate"
-                        ]
-                    ),
-                    weight_decay=(
-                        hyperparameters[
-                            "weight_decay"
-                        ]
                     ),
                     "train_batch_size": (
                         ALBERTINA_TRAIN_BATCH_SIZE
                     ),
                     "gradient_accumulation_steps": (
                         ALBERTINA_GRADIENT_ACCUMULATION_STEPS
+                    ),
+                    "learning_rate": (
+                        hyperparameters[
+                            "learning_rate"
+                        ]
+                    ),
+                    "weight_decay": (
+                        hyperparameters[
+                            "weight_decay"
+                        ]
                     ),
                     "training_seconds": (
                         training_seconds
