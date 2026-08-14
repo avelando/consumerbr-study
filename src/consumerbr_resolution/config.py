@@ -119,9 +119,29 @@ BERTIMBAU_TOKEN_CACHE_PATH = (
     / "bertimbau_base_tokens.parquet"
 )
 
+BERTIMBAU_HEAD_TAIL_TOKEN_CACHE_PATH = (
+    TOKENIZED_DATA_DIR
+    / "bertimbau_base_head_tail_256_tokens.parquet"
+)
+
+BERTIMBAU_LONG_TOKEN_CACHE_PATH = (
+    TOKENIZED_DATA_DIR
+    / "bertimbau_base_head_512_tokens.parquet"
+)
+
 ALBERTINA_TOKEN_CACHE_PATH = (
     TOKENIZED_DATA_DIR
     / "albertina_100m_ptbr_tokens.parquet"
+)
+
+ALBERTINA_HEAD_TAIL_TOKEN_CACHE_PATH = (
+    TOKENIZED_DATA_DIR
+    / "albertina_100m_ptbr_head_tail_256_tokens.parquet"
+)
+
+ALBERTINA_LONG_TOKEN_CACHE_PATH = (
+    TOKENIZED_DATA_DIR
+    / "albertina_100m_ptbr_head_512_tokens.parquet"
 )
 
 RESOLVED_STATUS = "Resolvido"
@@ -256,6 +276,7 @@ BERTIMBAU_REVISION = (
 )
 
 BERTIMBAU_MAX_LENGTH = 256
+BERTIMBAU_LONG_MAX_LENGTH = 512
 
 BERTIMBAU_TOKENIZATION_BATCH_SIZE = 2_048
 
@@ -280,6 +301,8 @@ ALBERTINA_REVISION = (
 )
 
 ALBERTINA_MAX_LENGTH = 256
+
+ALBERTINA_LONG_MAX_LENGTH = 512
 
 ALBERTINA_TOKENIZATION_BATCH_SIZE = 2_048
 
