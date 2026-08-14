@@ -18,7 +18,6 @@ from consumerbr_resolution.config import (
     METRICS_DIR,
     PREDICTIONS_DIR,
     RANDOM_SEED,
-    SGD_ALPHA,
     SGD_BATCH_SIZE,
     SGD_EPOCHS,
     SGD_LOSS,
