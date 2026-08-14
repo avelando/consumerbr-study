@@ -5,6 +5,7 @@ from consumerbr_resolution.analysis_registry import (
     MODEL_PREDICTION_SPECS,
 )
 from consumerbr_resolution.config import (
+    EFFECTIVE_CALIBRATION_MODEL_SUMMARY_PATH,
     FINAL_RESULTS_DIR,
     METRICS_DIR,
     SEED_STABILITY_SUMMARY_PATH,
@@ -72,6 +73,11 @@ FINAL_SIGNIFICANT_PAIRWISE_PATH = (
 FINAL_SEED_STABILITY_PATH = (
     FINAL_RESULTS_DIR
     / "final_seed_stability_summary.csv"
+)
+
+FINAL_EFFECTIVE_CALIBRATION_PATH = (
+    FINAL_RESULTS_DIR
+    / "final_effective_calibration_summary.csv"
 )
 
 
@@ -853,6 +859,7 @@ def consolidate_final_results():
         FINAL_CALIBRATION_PATH,
         FINAL_SIGNIFICANT_PAIRWISE_PATH,
         FINAL_SEED_STABILITY_PATH,
+        FINAL_EFFECTIVE_CALIBRATION_PATH,
     ]
 
     if all(
@@ -961,6 +968,15 @@ def consolidate_final_results():
 
     seed_stability.to_csv(
         FINAL_SEED_STABILITY_PATH,
+        index=False,
+    )
+
+    effective_calibration = pd.read_csv(
+        EFFECTIVE_CALIBRATION_MODEL_SUMMARY_PATH
+    )
+
+    effective_calibration.to_csv(
+        FINAL_EFFECTIVE_CALIBRATION_PATH,
         index=False,
     )
 

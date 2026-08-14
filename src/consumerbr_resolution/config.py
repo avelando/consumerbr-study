@@ -122,6 +122,11 @@ ANALYSIS_DIR = RESULTS_DIR / "analysis"
 SEED_STABILITY_DIR = (
     ANALYSIS_DIR / "seed_stability"
 )
+
+EFFECTIVE_CALIBRATION_DIR = (
+    ANALYSIS_DIR / "effective_calibration"
+)
+
 FINAL_RESULTS_DIR = RESULTS_DIR / "final"
 
 CLASSICAL_TUNING_RESULTS_PATH = (
@@ -161,6 +166,21 @@ SEED_STABILITY_BY_SEED_PATH = (
 SEED_STABILITY_SUMMARY_PATH = (
     SEED_STABILITY_DIR
     / "seed_stability_summary.csv"
+)
+
+EFFECTIVE_CALIBRATION_FOLD_SUMMARY_PATH = (
+    EFFECTIVE_CALIBRATION_DIR
+    / "effective_calibration_fold_summary.csv"
+)
+
+EFFECTIVE_CALIBRATION_MODEL_SUMMARY_PATH = (
+    EFFECTIVE_CALIBRATION_DIR
+    / "effective_calibration_model_summary.csv"
+)
+
+EFFECTIVE_CALIBRATION_BINS_PATH = (
+    EFFECTIVE_CALIBRATION_DIR
+    / "effective_calibration_bins.csv"
 )
 
 LOGS_DIR = PROJECT_ROOT / "logs"
@@ -546,6 +566,7 @@ def create_project_directories():
         FIGURES_DIR,
         ANALYSIS_DIR,
         SEED_STABILITY_DIR,
+        EFFECTIVE_CALIBRATION_DIR,
         FINAL_RESULTS_DIR,
         LOGS_DIR,
     ]

@@ -13,6 +13,9 @@ from consumerbr_resolution.statistical_robustness import (
 from consumerbr_resolution.risk_calibration_analysis import (
     analyze_risk_and_calibration,
 )
+from consumerbr_resolution.effective_calibration import (
+    calibrate_main_model_probabilities,
+)
 from consumerbr_resolution.generalization_analysis import (
     analyze_generalization,
 )
@@ -337,6 +340,11 @@ STAGES = [
         command="seed-stability",
         name="Evaluate main-model seed stability",
         function=evaluate_seed_stability,
+    ),
+    Stage(
+        command="effective-calibration",
+        name="Calibrate main-model probabilities",
+        function=calibrate_main_model_probabilities,
     ),
     Stage(
         command="risk-calibration",
