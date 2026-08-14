@@ -15,7 +15,6 @@ from consumerbr_resolution.config import (
     FEATURE_BASE_PATH,
     PERMUTATION_REPLICATES,
     RANDOM_SEED,
-    RANDOM_SEED,
     TEMPORAL_FOLDS,
     create_project_directories,
 )

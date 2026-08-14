@@ -131,6 +131,16 @@ CATBOOST_TUNING_RESULTS_PATH = (
     / "catboost_tuning_results.csv"
 )
 
+BERTIMBAU_TUNING_RESULTS_PATH = (
+    TABLES_DIR
+    / "bertimbau_tuning_results.csv"
+)
+
+ALBERTINA_TUNING_RESULTS_PATH = (
+    TABLES_DIR
+    / "albertina_tuning_results.csv"
+)
+
 SELECTED_HYPERPARAMETERS_PATH = (
     TABLES_DIR
     / "selected_hyperparameters.json"
@@ -320,6 +330,21 @@ CATBOOST_LEARNING_RATE_CANDIDATES = (
 CATBOOST_L2_LEAF_REG_CANDIDATES = (
     3.0,
     10.0,
+)
+
+TRANSFORMER_EPOCH_CANDIDATES = (
+    1,
+    2,
+)
+
+BERTIMBAU_LEARNING_RATE_CANDIDATES = (
+    1e-5,
+    2e-5,
+)
+
+ALBERTINA_LEARNING_RATE_CANDIDATES = (
+    1e-5,
+    2e-5,
 )
 
 TFIDF_NGRAM_RANGE = (1, 2)

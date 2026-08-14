@@ -116,6 +116,10 @@ from consumerbr_resolution.selection_bias import (
 from consumerbr_resolution.temporal_protocol import (
     build_temporal_protocol,
 )
+from consumerbr_resolution.compact_transformer_tuning import (
+    tune_albertina_hyperparameters,
+    tune_bertimbau_hyperparameters,
+)
 
 
 @dataclass(frozen=True)
@@ -262,6 +266,11 @@ STAGES = [
         function=build_bertimbau_token_cache,
     ),
     Stage(
+        command="bertimbau-tuning",
+        name="Tune BERTimbau hyperparameters",
+        function=tune_bertimbau_hyperparameters,
+    ),
+    Stage(
         command="bertimbau",
         name="Evaluate BERTimbau temporal fine-tuning",
         function=evaluate_bertimbau,
@@ -290,6 +299,11 @@ STAGES = [
         command="albertina-tokens",
         name="Build Albertina token cache",
         function=build_albertina_token_cache,
+    ),
+    Stage(
+        command="albertina-tuning",
+        name="Tune Albertina hyperparameters",
+        function=tune_albertina_hyperparameters,
     ),
     Stage(
         command="albertina",

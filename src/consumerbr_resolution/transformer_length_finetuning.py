@@ -57,6 +57,10 @@ from consumerbr_resolution.evaluation import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_albertina_hyperparameters,
+    get_selected_bertimbau_hyperparameters,
+)
 
 
 METRIC_FIELDS = [
@@ -71,6 +75,7 @@ METRIC_FIELDS = [
     "train_batch_size",
     "gradient_accumulation_steps",
     "learning_rate",
+    "weight_decay",
     "training_seconds",
     "scoring_seconds",
     "accuracy",
@@ -151,6 +156,7 @@ def evaluate_transformer_length_variant(
     gradient_accumulation_steps,
     epochs,
     learning_rate,
+    weight_decay,
     gradient_checkpointing,
     finetuning_module,
     tokenizer_kwargs=None,
@@ -316,6 +322,11 @@ def evaluate_transformer_length_variant(
                     gradient_accumulation_steps=(
                         gradient_accumulation_steps
                     ),
+                    epochs=epochs,
+                    learning_rate=learning_rate,
+                    weight_decay=(
+                        weight_decay
+                    ),
                 )
             )
 
@@ -335,6 +346,9 @@ def evaluate_transformer_length_variant(
                     eval_batch_size=(
                         eval_batch_size
                     ),
+                    epochs=epochs,
+                    learning_rate=learning_rate,
+                    weight_decay=weight_decay,
                 )
             )
 
@@ -425,6 +439,7 @@ def evaluate_transformer_length_variant(
                 "training_seconds": (
                     training_seconds
                 ),
+                "weight_decay": weight_decay,
             }
 
             rows = [
@@ -491,6 +506,9 @@ def evaluate_transformer_length_variant(
 
 
 def evaluate_bertimbau_head_tail_256():
+    hyperparameters = (
+        get_selected_bertimbau_hyperparameters()
+    )
     evaluate_transformer_length_variant(
         model_name="bertimbau_head_tail_256",
         token_strategy="head_tail",
@@ -511,7 +529,15 @@ def evaluate_bertimbau_head_tail_256():
         gradient_accumulation_steps=(
             BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
         ),
-        epochs=BERTIMBAU_EPOCHS,
+        epochs=(
+            hyperparameters["epochs"]
+        ),
+        learning_rate=(
+            hyperparameters["learning_rate"]
+        ),
+        weight_decay=(
+            hyperparameters["weight_decay"]
+        ),
         learning_rate=BERTIMBAU_LEARNING_RATE,
         gradient_checkpointing=(
             BERTIMBAU_GRADIENT_CHECKPOINTING
@@ -524,6 +550,9 @@ def evaluate_bertimbau_head_tail_256():
 
 
 def evaluate_bertimbau_head_512():
+    hyperparameters = (
+        get_selected_bertimbau_hyperparameters()
+    )
     evaluate_transformer_length_variant(
         model_name="bertimbau_head_512",
         token_strategy="head",
@@ -544,7 +573,15 @@ def evaluate_bertimbau_head_512():
         gradient_accumulation_steps=(
             BERTIMBAU_LONG_GRADIENT_ACCUMULATION_STEPS
         ),
-        epochs=BERTIMBAU_EPOCHS,
+        epochs=(
+            hyperparameters["epochs"]
+        ),
+        learning_rate=(
+            hyperparameters["learning_rate"]
+        ),
+        weight_decay=(
+            hyperparameters["weight_decay"]
+        ),
         learning_rate=BERTIMBAU_LEARNING_RATE,
         gradient_checkpointing=(
             BERTIMBAU_GRADIENT_CHECKPOINTING
@@ -557,6 +594,9 @@ def evaluate_bertimbau_head_512():
 
 
 def evaluate_albertina_head_tail_256():
+    hyperparameters = (
+        get_selected_albertina_hyperparameters()
+    )
     evaluate_transformer_length_variant(
         model_name="albertina_head_tail_256",
         token_strategy="head_tail",
@@ -577,8 +617,15 @@ def evaluate_albertina_head_tail_256():
         gradient_accumulation_steps=(
             ALBERTINA_GRADIENT_ACCUMULATION_STEPS
         ),
-        epochs=ALBERTINA_EPOCHS,
-        learning_rate=ALBERTINA_LEARNING_RATE,
+        epochs=(
+            hyperparameters["epochs"]
+        ),
+        learning_rate=(
+            hyperparameters["learning_rate"]
+        ),
+        weight_decay=(
+            hyperparameters["weight_decay"]
+        ),
         gradient_checkpointing=(
             ALBERTINA_GRADIENT_CHECKPOINTING
         ),
@@ -590,6 +637,9 @@ def evaluate_albertina_head_tail_256():
 
 
 def evaluate_albertina_head_512():
+    hyperparameters = (
+        get_selected_albertina_hyperparameters()
+    )
     evaluate_transformer_length_variant(
         model_name="albertina_head_512",
         token_strategy="head",
@@ -610,7 +660,15 @@ def evaluate_albertina_head_512():
         gradient_accumulation_steps=(
             ALBERTINA_LONG_GRADIENT_ACCUMULATION_STEPS
         ),
-        epochs=ALBERTINA_EPOCHS,
+        epochs=(
+            hyperparameters["epochs"]
+        ),
+        learning_rate=(
+            hyperparameters["learning_rate"]
+        ),
+        weight_decay=(
+            hyperparameters["weight_decay"]
+        ),
         learning_rate=ALBERTINA_LEARNING_RATE,
         gradient_checkpointing=(
             ALBERTINA_GRADIENT_CHECKPOINTING

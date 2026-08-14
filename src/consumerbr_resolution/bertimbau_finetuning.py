@@ -43,6 +43,9 @@ from consumerbr_resolution.evaluation import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_bertimbau_hyperparameters,
+)
 
 
 BERTIMBAU_METRICS_DIR = (
@@ -68,6 +71,7 @@ METRIC_FIELDS = [
     "train_batch_size",
     "gradient_accumulation_steps",
     "learning_rate",
+    "weight_decay",
     "training_seconds",
     "scoring_seconds",
     "accuracy",
@@ -413,6 +417,9 @@ def train_model(
     train_document_count,
     train_batch_size=None,
     gradient_accumulation_steps=None,
+    epochs=None,
+    learning_rate=None,
+    weight_decay=None,
 ):
     if train_batch_size is None:
         train_batch_size = (
@@ -424,12 +431,23 @@ def train_model(
             BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
         )
 
+    if epochs is None:
+        epochs = BERTIMBAU_EPOCHS
+
+    if learning_rate is None:
+        learning_rate = (
+            BERTIMBAU_LEARNING_RATE
+        )
+
+    if weight_decay is None:
+        weight_decay = (
+            BERTIMBAU_WEIGHT_DECAY
+        )
+
     optimizer = AdamW(
         model.parameters(),
-        lr=BERTIMBAU_LEARNING_RATE,
-        weight_decay=(
-            BERTIMBAU_WEIGHT_DECAY
-        ),
+        lr=learning_rate,
+        weight_decay=weight_decay,
     )
 
     batches_per_epoch = math.ceil(
@@ -444,7 +462,7 @@ def train_model(
 
     total_optimizer_steps = (
         optimizer_steps_per_epoch
-        * BERTIMBAU_EPOCHS
+        * epochs
     )
 
     scheduler = create_scheduler(
@@ -477,12 +495,12 @@ def train_model(
 
     for epoch in range(
         1,
-        BERTIMBAU_EPOCHS + 1,
+        epochs + 1,
     ):
         print()
         print(
             f"Epoch {epoch}/"
-            f"{BERTIMBAU_EPOCHS}"
+            f"{epochs}"
         )
 
         batch_index = 0
@@ -817,6 +835,10 @@ def rebuild_aggregate_metrics():
 def evaluate_bertimbau():
     create_project_directories()
 
+    hyperparameters = (
+        get_selected_bertimbau_hyperparameters()
+    )
+
     BERTIMBAU_METRICS_DIR.mkdir(
         parents=True,
         exist_ok=True,
@@ -976,6 +998,19 @@ def evaluate_bertimbau():
                 train_document_count=(
                     train_document_count
                 ),
+                epochs=(
+                    hyperparameters["epochs"]
+                ),
+                learning_rate=(
+                    hyperparameters[
+                        "learning_rate"
+                    ]
+                ),
+                weight_decay=(
+                    hyperparameters[
+                        "weight_decay"
+                    ]
+                ),
             )
 
             validation = score_split(
@@ -1075,7 +1110,7 @@ def evaluate_bertimbau():
                         "validation_macro_f1"
                     ),
                     "epochs": (
-                        BERTIMBAU_EPOCHS
+                        hyperparameters["epochs"]
                     ),
                     "train_batch_size": (
                         BERTIMBAU_TRAIN_BATCH_SIZE
@@ -1084,7 +1119,14 @@ def evaluate_bertimbau():
                         BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
                     ),
                     "learning_rate": (
-                        BERTIMBAU_LEARNING_RATE
+                        hyperparameters[
+                            "learning_rate"
+                        ]
+                    ),
+                    "weight_decay": (
+                        hyperparameters[
+                            "weight_decay"
+                        ]
                     ),
                     "training_seconds": (
                         training_seconds
@@ -1104,7 +1146,7 @@ def evaluate_bertimbau():
                         "validation_macro_f1"
                     ),
                     "epochs": (
-                        BERTIMBAU_EPOCHS
+                        hyperparameters["epochs"]
                     ),
                     "train_batch_size": (
                         BERTIMBAU_TRAIN_BATCH_SIZE
@@ -1113,7 +1155,14 @@ def evaluate_bertimbau():
                         BERTIMBAU_GRADIENT_ACCUMULATION_STEPS
                     ),
                     "learning_rate": (
-                        BERTIMBAU_LEARNING_RATE
+                        hyperparameters[
+                            "learning_rate"
+                        ]
+                    ),
+                    "weight_decay": (
+                        hyperparameters[
+                            "weight_decay"
+                        ]
                     ),
                     "training_seconds": (
                         training_seconds

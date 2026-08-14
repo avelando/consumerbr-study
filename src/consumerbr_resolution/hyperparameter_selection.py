@@ -68,3 +68,55 @@ def get_selected_catboost_hyperparameters():
             selected["l2_leaf_reg"]
         ),
     }
+
+
+def get_selected_bertimbau_hyperparameters():
+    parameters = (
+        load_selected_hyperparameters()
+    )
+
+    if "bertimbau" not in parameters:
+        raise KeyError(
+            "Selected BERTimbau hyperparameters were not found. "
+            "Run the BERTimbau tuning stage first."
+        )
+
+    selected = parameters["bertimbau"]
+
+    return {
+        "epochs": int(
+            selected["epochs"]
+        ),
+        "learning_rate": float(
+            selected["learning_rate"]
+        ),
+        "weight_decay": float(
+            selected["weight_decay"]
+        ),
+    }
+
+
+def get_selected_albertina_hyperparameters():
+    parameters = (
+        load_selected_hyperparameters()
+    )
+
+    if "albertina" not in parameters:
+        raise KeyError(
+            "Selected Albertina hyperparameters were not found. "
+            "Run the Albertina tuning stage first."
+        )
+
+    selected = parameters["albertina"]
+
+    return {
+        "epochs": int(
+            selected["epochs"]
+        ),
+        "learning_rate": float(
+            selected["learning_rate"]
+        ),
+        "weight_decay": float(
+            selected["weight_decay"]
+        ),
+    }
