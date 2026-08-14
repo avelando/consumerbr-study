@@ -9,10 +9,37 @@ from consumerbr_resolution.config import (
     create_project_directories,
 )
 
+from consumerbr_resolution.config import (
+    EXPECTED_CORPUS_OBSERVATION_END,
+    FEATURE_BASE_PATH,
+    TABLES_DIR,
+    TEMPORAL_FIRST_VALIDATION_START,
+    TEMPORAL_FOLDS,
+    TEMPORAL_STEP_MONTHS,
+    TEMPORAL_TEST_MONTHS,
+    TEMPORAL_TRAIN_START,
+    TEMPORAL_VALIDATION_MONTHS,
+    TUNING_VALIDATION_END,
+    create_project_directories,
+)
+
+from consumerbr_resolution.temporal_design import (
+    generate_temporal_folds,
+    generate_test_window_candidates,
+)
+
 
 TEMPORAL_PROTOCOL_PATH = TABLES_DIR / "temporal_protocol.csv"
 TEMPORAL_FOLD_SUMMARY_PATH = TABLES_DIR / "temporal_fold_summary.csv"
+TEMPORAL_PROTOCOL_AUDIT_PATH = (
+    TABLES_DIR
+    / "temporal_protocol_audit.csv"
+)
 
+TEMPORAL_TEST_WINDOW_ELIGIBILITY_PATH = (
+    TABLES_DIR
+    / "temporal_test_window_eligibility.csv"
+)
 
 def build_temporal_protocol():
     create_project_directories()

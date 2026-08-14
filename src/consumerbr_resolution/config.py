@@ -1,5 +1,10 @@
 from pathlib import Path
 
+from consumerbr_resolution.temporal_design import (
+    generate_temporal_folds,
+    validate_temporal_folds,
+)
+
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 
 DATA_DIR = PROJECT_ROOT / "data"
@@ -287,56 +292,85 @@ VALID_UFS = (
     "TO",
 )
 
-TEMPORAL_FOLDS = (
-    {
-        "fold": 1,
-        "train_end": "2023-06-30",
-        "validation_start": "2023-07-01",
-        "validation_end": "2023-09-30",
-        "test_start": "2023-10-01",
-        "test_end": "2023-12-31",
-    },
-    {
-        "fold": 2,
-        "train_end": "2023-09-30",
-        "validation_start": "2023-10-01",
-        "validation_end": "2023-12-31",
-        "test_start": "2024-01-01",
-        "test_end": "2024-03-31",
-    },
-    {
-        "fold": 3,
-        "train_end": "2023-12-31",
-        "validation_start": "2024-01-01",
-        "validation_end": "2024-03-31",
-        "test_start": "2024-04-01",
-        "test_end": "2024-06-30",
-    },
-    {
-        "fold": 4,
-        "train_end": "2024-03-31",
-        "validation_start": "2024-04-01",
-        "validation_end": "2024-06-30",
-        "test_start": "2024-07-01",
-        "test_end": "2024-09-30",
-    },
-    {
-        "fold": 5,
-        "train_end": "2024-06-30",
-        "validation_start": "2024-07-01",
-        "validation_end": "2024-09-30",
-        "test_start": "2024-10-01",
-        "test_end": "2024-12-31",
-    },
-    {
-        "fold": 6,
-        "train_end": "2024-09-30",
-        "validation_start": "2024-10-01",
-        "validation_end": "2024-12-31",
-        "test_start": "2025-01-01",
-        "test_end": "2025-03-31",
-    },
+# TEMPORAL_FOLDS = (
+#     {
+#         "fold": 1,
+#         "train_end": "2023-06-30",
+#         "validation_start": "2023-07-01",
+#         "validation_end": "2023-09-30",
+#         "test_start": "2023-10-01",
+#         "test_end": "2023-12-31",
+#     },
+#     {
+#         "fold": 2,
+#         "train_end": "2023-09-30",
+#         "validation_start": "2023-10-01",
+#         "validation_end": "2023-12-31",
+#         "test_start": "2024-01-01",
+#         "test_end": "2024-03-31",
+#     },
+#     {
+#         "fold": 3,
+#         "train_end": "2023-12-31",
+#         "validation_start": "2024-01-01",
+#         "validation_end": "2024-03-31",
+#         "test_start": "2024-04-01",
+#         "test_end": "2024-06-30",
+#     },
+#     {
+#         "fold": 4,
+#         "train_end": "2024-03-31",
+#         "validation_start": "2024-04-01",
+#         "validation_end": "2024-06-30",
+#         "test_start": "2024-07-01",
+#         "test_end": "2024-09-30",
+#     },
+#     {
+#         "fold": 5,
+#         "train_end": "2024-06-30",
+#         "validation_start": "2024-07-01",
+#         "validation_end": "2024-09-30",
+#         "test_start": "2024-10-01",
+#         "test_end": "2024-12-31",
+#     },
+#     {
+#         "fold": 6,
+#         "train_end": "2024-09-30",
+#         "validation_start": "2024-10-01",
+#         "validation_end": "2024-12-31",
+#         "test_start": "2025-01-01",
+#         "test_end": "2025-03-31",
+#     },
+# )
+
+TEMPORAL_TRAIN_START = "2021-05-01"
+EXPECTED_CORPUS_OBSERVATION_END = "2025-04-03"
+
+TUNING_TRAIN_END = "2023-03-31"
+TUNING_VALIDATION_START = "2023-04-01"
+TUNING_VALIDATION_END = "2023-06-30"
+
+TEMPORAL_FIRST_VALIDATION_START = "2023-07-01"
+
+TEMPORAL_VALIDATION_MONTHS = 3
+TEMPORAL_TEST_MONTHS = 3
+TEMPORAL_STEP_MONTHS = 3
+
+TEMPORAL_FOLDS = generate_temporal_folds(
+    first_validation_start=(
+        TEMPORAL_FIRST_VALIDATION_START
+    ),
+    observation_end=(
+        EXPECTED_CORPUS_OBSERVATION_END
+    ),
+    validation_months=(
+        TEMPORAL_VALIDATION_MONTHS
+    ),
+    test_months=TEMPORAL_TEST_MONTHS,
+    step_months=TEMPORAL_STEP_MONTHS,
 )
+
+validate_temporal_folds(TEMPORAL_FOLDS)
 
 TUNING_TRAIN_END = "2023-03-31"
 TUNING_VALIDATION_START = "2023-04-01"
