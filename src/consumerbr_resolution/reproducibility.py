@@ -15,6 +15,7 @@ from consumerbr_resolution.config import (
     ALBERTINA_REVISION,
     BERTIMBAU_MODEL_NAME,
     BERTIMBAU_REVISION,
+    DATA_DIR,
     EXPERIMENT_SEEDS,
     FEATURE_BASE_PATH,
     METRICS_DIR,
@@ -22,6 +23,7 @@ from consumerbr_resolution.config import (
     PREDICTIONS_DIR,
     PRIMARY_EXPERIMENT_SEED,
     RANDOM_SEED,
+    RESULTS_DIR,
     TABLES_DIR,
     TEMPORAL_FOLDS,
     create_project_directories,
@@ -98,6 +100,9 @@ def sha256_file(path):
 
 
 def directory_has_files(path):
+    if not path.exists():
+        return False
+
     return any(
         candidate.is_file()
         for candidate
@@ -148,6 +153,86 @@ def get_git_state():
             "--porcelain",
         ),
     }
+
+
+def official_mode_enabled():
+    return (
+        os.environ.get(
+            "CONSUMERBR_OFFICIAL_RUN",
+            "0",
+        )
+        == "1"
+    )
+
+
+def validate_official_git_state(
+    git_state,
+):
+    if git_state["branch"] != "main":
+        raise RuntimeError(
+            "Official execution must "
+            "run from the main branch."
+        )
+
+    if git_state["status"]:
+        raise RuntimeError(
+            "Official execution requires "
+            "a clean Git working tree."
+        )
+
+    if not git_state["tag"]:
+        raise RuntimeError(
+            "Official execution requires "
+            "HEAD to have an exact Git tag."
+        )
+
+    if not torch.cuda.is_available():
+        raise RuntimeError(
+            "CUDA is required for the "
+            "official transformer evaluation."
+        )
+
+
+def validate_official_run_preflight():
+    if not official_mode_enabled():
+        print(
+            "Official-run mode is disabled; "
+            "strict preflight checks were skipped."
+        )
+        return
+
+    git_state = get_git_state()
+
+    validate_official_git_state(
+        git_state
+    )
+
+    if not OFFICIAL_RUN_MANIFEST_PATH.exists():
+        stale_roots = [
+            path
+            for path in (
+                DATA_DIR,
+                MODELS_DIR,
+                RESULTS_DIR,
+            )
+            if directory_has_files(path)
+        ]
+
+        if stale_roots:
+            raise RuntimeError(
+                "A new official execution must "
+                "start without pre-existing "
+                "data, model, or result files: "
+                + ", ".join(
+                    str(path)
+                    for path
+                    in stale_roots
+                )
+            )
+
+    print(
+        "Official-run preflight validation passed."
+    )
 
 
 def build_manifest(
@@ -258,20 +343,18 @@ def build_manifest(
 def validate_or_create_official_run_manifest():
     create_project_directories()
 
-    official_mode = (
-        os.environ.get(
-            "CONSUMERBR_OFFICIAL_RUN",
-            "0",
-        )
-        == "1"
-    )
-
     git_state = get_git_state()
 
-    if (
-        OFFICIAL_RUN_MANIFEST_PATH
-        .exists()
-    ):
+    if official_mode_enabled():
+        validate_official_git_state(
+            git_state
+        )
+
+    current_manifest = build_manifest(
+        git_state
+    )
+
+    if OFFICIAL_RUN_MANIFEST_PATH.exists():
         with (
             OFFICIAL_RUN_MANIFEST_PATH
             .open(
@@ -283,85 +366,23 @@ def validate_or_create_official_run_manifest():
                 file
             )
 
-        if (
-            existing[
-                "git"
-            ]["commit"]
-            != git_state[
-                "commit"
-            ]
-        ):
+        if existing != current_manifest:
             raise RuntimeError(
-                "Existing official-run "
-                "manifest belongs to a "
-                "different commit."
-            )
-
-        if (
-            existing[
-                "git"
-            ]["tag"]
-            != git_state[
-                "tag"
-            ]
-        ):
-            raise RuntimeError(
-                "Existing official-run "
-                "manifest belongs to a "
-                "different tag."
-            )
-
-        if (
-            existing[
-                "temporal_folds"
-            ]
-            != list(
-                TEMPORAL_FOLDS
-            )
-        ):
-            raise RuntimeError(
-                "Existing official-run "
-                "manifest uses a different "
-                "temporal protocol."
+                "Existing official-run manifest "
+                "does not match the current "
+                "commit, environment, dataset, "
+                "randomness, transformer revisions, "
+                "or temporal protocol."
             )
 
         print(
-            "Official-run manifest "
-            "matches the current "
-            "experiment state."
+            "Official-run manifest matches "
+            "the current experiment state."
         )
 
         return
 
-    if official_mode:
-        if (
-            git_state["branch"]
-            != "main"
-        ):
-            raise RuntimeError(
-                "Official execution must "
-                "start from the main branch."
-            )
-
-        if git_state["status"]:
-            raise RuntimeError(
-                "Official execution requires "
-                "a clean Git working tree."
-            )
-
-        if not git_state["tag"]:
-            raise RuntimeError(
-                "Official execution requires "
-                "HEAD to have an exact Git tag."
-            )
-
-        if not torch.cuda.is_available():
-            raise RuntimeError(
-                "CUDA is required for the "
-                "official transformer "
-                "evaluation."
-            )
-
+    if official_mode_enabled():
         stale_directories = [
             path
             for path
@@ -377,20 +398,16 @@ def validate_or_create_official_run_manifest():
 
         if stale_directories:
             raise RuntimeError(
-                "Official execution must "
-                "start without pre-existing "
-                "model, metric, or prediction "
-                "files: "
+                "Official execution must reach "
+                "manifest creation without "
+                "pre-existing model, metric, "
+                "or prediction files: "
                 + ", ".join(
                     str(path)
                     for path
                     in stale_directories
                 )
             )
-
-    manifest = build_manifest(
-        git_state
-    )
 
     temporary_path = (
         OFFICIAL_RUN_MANIFEST_PATH
@@ -407,7 +424,7 @@ def validate_or_create_official_run_manifest():
         encoding="utf-8",
     ) as file:
         json.dump(
-            manifest,
+            current_manifest,
             file,
             indent=2,
             sort_keys=True,

@@ -1,5 +1,5 @@
 import csv
-from datetime import date
+from datetime import date, timedelta
 
 import duckdb
 
@@ -13,7 +13,9 @@ from consumerbr_resolution.config import (
     TEMPORAL_TEST_MONTHS,
     TEMPORAL_TRAIN_START,
     TEMPORAL_VALIDATION_MONTHS,
+    TUNING_TRAIN_END,
     TUNING_VALIDATION_END,
+    TUNING_VALIDATION_START,
     create_project_directories,
 )
 from consumerbr_resolution.temporal_design import (
@@ -262,6 +264,16 @@ def build_temporal_protocol():
                 "supported by the dataset."
             )
 
+        tuning_train_end = date.fromisoformat(
+            TUNING_TRAIN_END
+        )
+
+        tuning_validation_start = (
+            date.fromisoformat(
+                TUNING_VALIDATION_START
+            )
+        )
+
         tuning_end = date.fromisoformat(
             TUNING_VALIDATION_END
         )
@@ -273,12 +285,23 @@ def build_temporal_protocol():
         )
 
         if (
-            tuning_end
-            >= first_evaluation_date
+            tuning_train_end
+            + timedelta(days=1)
+            != tuning_validation_start
         ):
             raise RuntimeError(
-                "Hyperparameter tuning overlaps "
-                "the evaluation protocol."
+                "Tuning train and validation "
+                "windows are not contiguous."
+            )
+
+        if (
+            tuning_end
+            + timedelta(days=1)
+            != first_evaluation_date
+        ):
+            raise RuntimeError(
+                "Tuning validation and temporal "
+                "evaluation are not contiguous."
             )
 
         protocol_rows = []

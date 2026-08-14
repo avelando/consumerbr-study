@@ -1,6 +1,9 @@
 from dataclasses import dataclass
 from typing import Callable
 
+from consumerbr_resolution.prediction_integrity import (
+    validate_prediction_integrity,
+)
 from consumerbr_resolution.final_consolidation import (
     consolidate_final_results,
 )
@@ -126,6 +129,7 @@ from consumerbr_resolution.temporal_protocol import (
     build_temporal_protocol,
 )
 from consumerbr_resolution.reproducibility import (
+    validate_official_run_preflight,
     validate_or_create_official_run_manifest,
 )
 from consumerbr_resolution.compact_transformer_tuning import (
@@ -142,6 +146,11 @@ class Stage:
 
 
 STAGES = [
+    Stage(
+        command="official-preflight",
+        name="Validate official-run preflight",
+        function=validate_official_run_preflight,
+    ),
     Stage(
         command="download",
         name="Download ConsumerBR corpus",
@@ -351,6 +360,11 @@ STAGES = [
         command="albertina-catboost-fusion",
         name="Evaluate Albertina and CatBoost late fusion",
         function=evaluate_albertina_catboost_fusion,
+    ),
+    Stage(
+        command="prediction-integrity",
+        name="Validate test-prediction integrity",
+        function=validate_prediction_integrity,
     ),
     Stage(
         command="generalization",

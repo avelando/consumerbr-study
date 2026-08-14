@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "consumerbr-resolution-prediction"
 version = "0.1.0"
-requires-python = ">=3.10"
+requires-python = ">=3.12,<3.16"
 dependencies = [
     "catboost==1.2.10",
     "duckdb==1.5.5",
