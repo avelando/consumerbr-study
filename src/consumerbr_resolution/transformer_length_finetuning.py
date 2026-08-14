@@ -15,13 +15,11 @@ from consumerbr_resolution import (
     bertimbau_finetuning,
 )
 from consumerbr_resolution.config import (
-    ALBERTINA_EPOCHS,
     ALBERTINA_EVAL_BATCH_SIZE,
     ALBERTINA_GRADIENT_ACCUMULATION_STEPS,
     ALBERTINA_GRADIENT_CHECKPOINTING,
     ALBERTINA_HEAD_TAIL_FINETUNED_DIR,
     ALBERTINA_HEAD_TAIL_TOKEN_CACHE_PATH,
-    ALBERTINA_LEARNING_RATE,
     ALBERTINA_LONG_EVAL_BATCH_SIZE,
     ALBERTINA_LONG_FINETUNED_DIR,
     ALBERTINA_LONG_GRADIENT_ACCUMULATION_STEPS,
@@ -31,13 +29,11 @@ from consumerbr_resolution.config import (
     ALBERTINA_MAX_LENGTH,
     ALBERTINA_PRETRAINED_DIR,
     ALBERTINA_TRAIN_BATCH_SIZE,
-    BERTIMBAU_EPOCHS,
     BERTIMBAU_EVAL_BATCH_SIZE,
     BERTIMBAU_GRADIENT_ACCUMULATION_STEPS,
     BERTIMBAU_GRADIENT_CHECKPOINTING,
     BERTIMBAU_HEAD_TAIL_FINETUNED_DIR,
     BERTIMBAU_HEAD_TAIL_TOKEN_CACHE_PATH,
-    BERTIMBAU_LEARNING_RATE,
     BERTIMBAU_LONG_EVAL_BATCH_SIZE,
     BERTIMBAU_LONG_FINETUNED_DIR,
     BERTIMBAU_LONG_GRADIENT_ACCUMULATION_STEPS,
@@ -346,9 +342,6 @@ def evaluate_transformer_length_variant(
                     eval_batch_size=(
                         eval_batch_size
                     ),
-                    epochs=epochs,
-                    learning_rate=learning_rate,
-                    weight_decay=weight_decay,
                 )
             )
 
@@ -538,7 +531,6 @@ def evaluate_bertimbau_head_tail_256():
         weight_decay=(
             hyperparameters["weight_decay"]
         ),
-        learning_rate=BERTIMBAU_LEARNING_RATE,
         gradient_checkpointing=(
             BERTIMBAU_GRADIENT_CHECKPOINTING
         ),
@@ -582,7 +574,6 @@ def evaluate_bertimbau_head_512():
         weight_decay=(
             hyperparameters["weight_decay"]
         ),
-        learning_rate=BERTIMBAU_LEARNING_RATE,
         gradient_checkpointing=(
             BERTIMBAU_GRADIENT_CHECKPOINTING
         ),
@@ -669,7 +660,6 @@ def evaluate_albertina_head_512():
         weight_decay=(
             hyperparameters["weight_decay"]
         ),
-        learning_rate=ALBERTINA_LEARNING_RATE,
         gradient_checkpointing=(
             ALBERTINA_GRADIENT_CHECKPOINTING
         ),

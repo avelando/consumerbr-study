@@ -500,7 +500,7 @@ def train_model(
         print()
         print(
             f"Epoch {epoch}/"
-            f"{ALBERTINA_EPOCHS}"
+            f"{epochs}"
         )
 
         batch_index = 0
@@ -997,6 +997,19 @@ def evaluate_albertina():
                 train_document_count=(
                     train_document_count
                 ),
+                epochs=(
+                    hyperparameters["epochs"]
+                ),
+                learning_rate=(
+                    hyperparameters[
+                        "learning_rate"
+                    ]
+                ),
+                weight_decay=(
+                    hyperparameters[
+                        "weight_decay"
+                    ]
+                ),
             )
 
             validation = score_split(
@@ -1095,27 +1108,11 @@ def evaluate_albertina():
                     "threshold_source": (
                         "validation_macro_f1"
                     ),
-                    epochs=(
-                        hyperparameters["epochs"]
-                    ),
-                    learning_rate=(
-                        hyperparameters[
-                            "learning_rate"
-                        ]
-                    ),
-                    weight_decay=(
-                        hyperparameters[
-                            "weight_decay"
-                        ]
-                    ),
                     "train_batch_size": (
                         ALBERTINA_TRAIN_BATCH_SIZE
                     ),
                     "gradient_accumulation_steps": (
                         ALBERTINA_GRADIENT_ACCUMULATION_STEPS
-                    ),
-                    "learning_rate": (
-                        ALBERTINA_LEARNING_RATE
                     ),
                     "training_seconds": (
                         training_seconds
@@ -1152,9 +1149,6 @@ def evaluate_albertina():
                     ),
                     "gradient_accumulation_steps": (
                         ALBERTINA_GRADIENT_ACCUMULATION_STEPS
-                    ),
-                    "learning_rate": (
-                        ALBERTINA_LEARNING_RATE
                     ),
                     "training_seconds": (
                         training_seconds
