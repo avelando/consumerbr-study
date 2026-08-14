@@ -8,7 +8,6 @@ from sklearn.naive_bayes import ComplementNB
 from tqdm import tqdm
 
 from consumerbr_resolution.config import (
-    COMPLEMENT_NB_ALPHA,
     FEATURE_BASE_PATH,
     METRICS_DIR,
     PREDICTIONS_DIR,
@@ -27,6 +26,9 @@ from consumerbr_resolution.tfidf_sgd import (
     iter_batches,
     score_split,
     write_predictions,
+)
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_complement_nb_alpha,
 )
 
 
@@ -69,9 +71,9 @@ METRIC_FIELDS = [
 ]
 
 
-def create_classifier():
+def create_classifier(alpha):
     return ComplementNB(
-        alpha=COMPLEMENT_NB_ALPHA,
+        alpha=alpha,
     )
 
 
@@ -215,6 +217,10 @@ def evaluate_tfidf_complement_nb():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = (
+        get_selected_complement_nb_alpha()
+    )
+
     print(
         "Evaluating TF-IDF + ComplementNB"
     )
@@ -281,7 +287,7 @@ def evaluate_tfidf_complement_nb():
                 / f"fold_{fold_number:02d}.joblib"
             )
 
-            model = create_classifier()
+            model = create_classifier(alpha)
 
             document_count = (
                 get_document_count(
@@ -370,7 +376,7 @@ def evaluate_tfidf_complement_nb():
                         "validation_macro_f1"
                     ),
                     "alpha": (
-                        COMPLEMENT_NB_ALPHA
+                        alpha
                     ),
                     "training_seconds": (
                         training_seconds
@@ -392,7 +398,7 @@ def evaluate_tfidf_complement_nb():
                         "validation_macro_f1"
                     ),
                     "alpha": (
-                        COMPLEMENT_NB_ALPHA
+                        alpha
                     ),
                     "training_seconds": (
                         training_seconds

@@ -29,6 +29,9 @@ from consumerbr_resolution.evaluation import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_sgd_alpha,
+)
 
 
 METRIC_FIELDS = [
@@ -185,11 +188,11 @@ def iter_batches(
         yield rows
 
 
-def create_classifier():
+def create_classifier(alpha):
     return SGDClassifier(
         loss=SGD_LOSS,
         penalty=SGD_PENALTY,
-        alpha=SGD_ALPHA,
+        alpha=alpha,
         random_state=RANDOM_SEED,
     )
 

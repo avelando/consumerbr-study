@@ -32,6 +32,9 @@ from consumerbr_resolution.evaluation import (
 from consumerbr_resolution.metadata import (
     transform_metadata_rows,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_sgd_alpha,
+)
 
 
 TFIDF_METADATA_SGD_METRICS_DIR = (
@@ -168,11 +171,11 @@ def iter_batches(
         yield rows
 
 
-def create_classifier():
+def create_classifier(alpha):
     return SGDClassifier(
         loss=SGD_LOSS,
         penalty=SGD_PENALTY,
-        alpha=SGD_ALPHA,
+        alpha=alpha,
         random_state=RANDOM_SEED,
     )
 

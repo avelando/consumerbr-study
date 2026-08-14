@@ -14,6 +14,18 @@ TFIDF_CHAR_MODELS_DIR = MODELS_DIR / "tfidf_char"
 METADATA_MODELS_DIR = MODELS_DIR / "metadata"
 CLASSICAL_MODELS_DIR = MODELS_DIR / "classical"
 
+TUNING_MODELS_DIR = MODELS_DIR / "tuning"
+
+TUNING_WORD_TFIDF_PATH = (
+    TUNING_MODELS_DIR
+    / "word_tfidf.joblib"
+)
+
+TUNING_CHAR_TFIDF_PATH = (
+    TUNING_MODELS_DIR
+    / "char_tfidf.joblib"
+)
+
 TFIDF_SGD_MODELS_DIR = CLASSICAL_MODELS_DIR / "tfidf_sgd"
 
 TFIDF_CHAR_SGD_MODELS_DIR = (
@@ -108,6 +120,16 @@ TABLES_DIR = RESULTS_DIR / "tables"
 FIGURES_DIR = RESULTS_DIR / "figures"
 ANALYSIS_DIR = RESULTS_DIR / "analysis"
 FINAL_RESULTS_DIR = RESULTS_DIR / "final"
+
+CLASSICAL_TUNING_RESULTS_PATH = (
+    TABLES_DIR
+    / "classical_tuning_results.csv"
+)
+
+SELECTED_HYPERPARAMETERS_PATH = (
+    TABLES_DIR
+    / "selected_hyperparameters.json"
+)
 
 LOGS_DIR = PROJECT_ROOT / "logs"
 
@@ -252,6 +274,22 @@ TEMPORAL_FOLDS = (
         "test_start": "2025-01-01",
         "test_end": "2025-03-31",
     },
+)
+
+TUNING_TRAIN_END = "2023-03-31"
+TUNING_VALIDATION_START = "2023-04-01"
+TUNING_VALIDATION_END = "2023-06-30"
+
+SGD_ALPHA_CANDIDATES = (
+    1e-6,
+    1e-5,
+    1e-4,
+)
+
+COMPLEMENT_NB_ALPHA_CANDIDATES = (
+    0.1,
+    0.5,
+    1.0,
 )
 
 TFIDF_NGRAM_RANGE = (1, 2)
@@ -400,6 +438,7 @@ def create_project_directories():
         TFIDF_CHAR_MODELS_DIR,
         METADATA_MODELS_DIR,
         CLASSICAL_MODELS_DIR,
+        TUNING_MODELS_DIR,
         TFIDF_SGD_MODELS_DIR,
         TFIDF_CHAR_SGD_MODELS_DIR,
         TFIDF_WORD_CHAR_SGD_MODELS_DIR,

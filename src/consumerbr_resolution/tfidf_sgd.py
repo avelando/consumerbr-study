@@ -26,6 +26,9 @@ from consumerbr_resolution.evaluation import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )
+from consumerbr_resolution.hyperparameter_selection import (
+    get_selected_sgd_alpha,
+)
 
 
 TFIDF_SGD_METRICS_DIR = METRICS_DIR / "tfidf_sgd"
@@ -146,7 +149,7 @@ def create_sgd_classifier():
     return SGDClassifier(
         loss=SGD_LOSS,
         penalty=SGD_PENALTY,
-        alpha=SGD_ALPHA,
+        alpha=alpha,
         random_state=RANDOM_SEED,
     )
 

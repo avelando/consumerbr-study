@@ -196,6 +196,11 @@ STAGES = [
         function=fit_tfidf_char_vectorizers,
     ),
     Stage(
+        command="classical-tuning",
+        name="Tune classical text hyperparameters",
+        function=tune_classical_text_hyperparameters,
+    ),
+    Stage(
         command="tfidf-char-sgd",
         name="Evaluate character TF-IDF with SGD",
         function=evaluate_tfidf_char_sgd,
