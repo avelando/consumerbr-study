@@ -4,6 +4,9 @@ from typing import Callable
 from consumerbr_resolution.final_consolidation import (
     consolidate_final_results,
 )
+from consumerbr_resolution.compact_classical_tuning import (
+    tune_classical_text_hyperparameters,
+)
 from consumerbr_resolution.statistical_robustness import (
     analyze_statistical_robustness,
 )
@@ -176,19 +179,9 @@ STAGES = [
         function=fit_tfidf_vectorizers,
     ),
     Stage(
-        command="tfidf-sgd",
-        name="Evaluate TF-IDF with SGD",
-        function=evaluate_tfidf_sgd,
-    ),
-    Stage(
         command="metadata",
         name="Fit fold-specific metadata preprocessors",
         function=fit_metadata_preprocessors,
-    ),
-    Stage(
-        command="metadata-sgd",
-        name="Evaluate metadata with SGD",
-        function=evaluate_metadata_sgd,
     ),
     Stage(
         command="tfidf-char",
@@ -199,6 +192,16 @@ STAGES = [
         command="classical-tuning",
         name="Tune classical text hyperparameters",
         function=tune_classical_text_hyperparameters,
+    ),
+    Stage(
+        command="tfidf-sgd",
+        name="Evaluate TF-IDF with SGD",
+        function=evaluate_tfidf_sgd,
+    ),
+    Stage(
+        command="metadata-sgd",
+        name="Evaluate metadata with SGD",
+        function=evaluate_metadata_sgd,
     ),
     Stage(
         command="tfidf-char-sgd",

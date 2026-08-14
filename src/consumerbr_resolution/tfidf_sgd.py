@@ -145,7 +145,7 @@ def iter_batches(
         yield rows
 
 
-def create_sgd_classifier():
+def create_sgd_classifier(alpha):
     return SGDClassifier(
         loss=SGD_LOSS,
         penalty=SGD_PENALTY,
@@ -518,6 +518,8 @@ def evaluate_tfidf_sgd():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = get_selected_sgd_alpha()
+
     print("Evaluating TF-IDF + SGD")
     print(f"Source: {FEATURE_BASE_PATH}")
     print(f"Models: {TFIDF_SGD_MODELS_DIR}")
@@ -583,7 +585,7 @@ def evaluate_tfidf_sgd():
                 vectorizer_path
             )
 
-            model = create_sgd_classifier()
+            model = create_sgd_classifier(alpha)
 
             train_document_count = (
                 get_document_count(
@@ -663,7 +665,7 @@ def evaluate_tfidf_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),

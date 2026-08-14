@@ -655,6 +655,8 @@ def evaluate_tfidf_metadata_recent_history_sgd():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = get_selected_sgd_alpha()
+
     print(
         "Evaluating TF-IDF + metadata + "
         "recent company history with SGD"
@@ -748,7 +750,7 @@ def evaluate_tfidf_metadata_recent_history_sgd():
                 )
             )
 
-            model = create_classifier()
+            model = create_classifier(alpha)
 
             training_seconds = train_model(
                 connection=connection,
@@ -821,7 +823,7 @@ def evaluate_tfidf_metadata_recent_history_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),
@@ -842,7 +844,7 @@ def evaluate_tfidf_metadata_recent_history_sgd():
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),

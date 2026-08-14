@@ -13,7 +13,6 @@ from consumerbr_resolution.config import (
     METRICS_DIR,
     PREDICTIONS_DIR,
     RANDOM_SEED,
-    SGD_ALPHA,
     SGD_BATCH_SIZE,
     SGD_EPOCHS,
     SGD_LOSS,
@@ -664,6 +663,8 @@ def evaluate_variant(
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = get_selected_sgd_alpha()
+
     print(
         f"Evaluating {model_name}"
     )
@@ -737,7 +738,7 @@ def evaluate_variant(
                     )
                 )
 
-            model = create_classifier()
+            model = create_classifier(alpha)
 
             train_document_count = (
                 get_document_count(
@@ -842,7 +843,7 @@ def evaluate_variant(
                         "validation_macro_f1"
                     ),
                     "epochs": SGD_EPOCHS,
-                    "alpha": SGD_ALPHA,
+                    "alpha": alpha,
                     "training_seconds": (
                         training_seconds
                     ),

@@ -15,7 +15,6 @@ from consumerbr_resolution.config import (
     METRICS_DIR,
     PREDICTIONS_DIR,
     RANDOM_SEED,
-    SGD_ALPHA,
     SGD_BATCH_SIZE,
     SGD_EPOCHS,
     SGD_LOSS,
@@ -636,6 +635,8 @@ def evaluate_metadata_sgd():
         FEATURE_BASE_PATH
     ).replace("'", "''")
 
+    alpha = get_selected_sgd_alpha()
+
     print("Evaluating metadata with SGD")
     print(
         f"Source: {FEATURE_BASE_PATH}"
@@ -755,7 +756,7 @@ def evaluate_metadata_sgd():
                 )
 
                 model = (
-                    create_classifier()
+                    create_classifier(alpha)
                 )
 
                 training_seconds = (
@@ -859,7 +860,7 @@ def evaluate_metadata_sgd():
                             SGD_EPOCHS
                         ),
                         "alpha": (
-                            SGD_ALPHA
+                            alpha
                         ),
                         "training_seconds": (
                             training_seconds
@@ -886,7 +887,7 @@ def evaluate_metadata_sgd():
                             SGD_EPOCHS
                         ),
                         "alpha": (
-                            SGD_ALPHA
+                            alpha
                         ),
                         "training_seconds": (
                             training_seconds
