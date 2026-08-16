@@ -88,6 +88,89 @@ def build_arrow_table(
     )
 
 
+def add_single_sequence_special_tokens(
+    tokenizer,
+    content_ids,
+):
+    cls_token_id = (
+        tokenizer.cls_token_id
+    )
+
+    sep_token_id = (
+        tokenizer.sep_token_id
+    )
+
+    if (
+        cls_token_id is None
+        or sep_token_id is None
+    ):
+        raise ValueError(
+            "Tokenizer must define "
+            "CLS and SEP token IDs."
+        )
+
+    special_token_count = (
+        tokenizer.num_special_tokens_to_add(
+            pair=False
+        )
+    )
+
+    if special_token_count != 2:
+        raise ValueError(
+            "Expected exactly two special "
+            "tokens for a single sequence, "
+            f"but found {special_token_count}."
+        )
+
+    return [
+        int(cls_token_id),
+        *content_ids,
+        int(sep_token_id),
+    ]
+
+
+def validate_special_token_construction(
+    tokenizer,
+):
+    probe_text = (
+        "ConsumerBR tokenizer "
+        "compatibility validation."
+    )
+
+    common_arguments = {
+        "truncation": False,
+        "padding": False,
+        "return_attention_mask": False,
+        "return_token_type_ids": False,
+    }
+
+    content_ids = tokenizer(
+        probe_text,
+        add_special_tokens=False,
+        **common_arguments,
+    )["input_ids"]
+
+    reference_ids = tokenizer(
+        probe_text,
+        add_special_tokens=True,
+        **common_arguments,
+    )["input_ids"]
+
+    constructed_ids = (
+        add_single_sequence_special_tokens(
+            tokenizer=tokenizer,
+            content_ids=content_ids,
+        )
+    )
+
+    if constructed_ids != reference_ids:
+        raise ValueError(
+            "Manual special-token construction "
+            "does not match the tokenizer's "
+            "native single-sequence encoding."
+        )
+    
+
 def build_input_ids(
     tokenizer,
     content_ids,
@@ -137,8 +220,9 @@ def build_input_ids(
         )
 
     input_ids = (
-        tokenizer.build_inputs_with_special_tokens(
-            selected_ids
+        add_single_sequence_special_tokens(
+            tokenizer=tokenizer,
+            content_ids=selected_ids,
         )
     )
 
@@ -216,6 +300,10 @@ def build_transformer_token_caches(
             local_files_only=True,
             **tokenizer_kwargs,
         )
+    )
+
+    validate_special_token_construction(
+        tokenizer
     )
 
     source_path = str(
