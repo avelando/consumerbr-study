@@ -1,766 +1,182 @@
 import csv
-from datetime import date, timedelta
+import json
+from pathlib import Path
 
 import duckdb
 
 from consumerbr_resolution.config import (
+    BERTIMBAU_EPOCHS,
+    BERTIMBAU_LEARNING_RATE_CANDIDATES,
+    BOOTSTRAP_REPLICATES,
+    COMPANY_HISTORY_SMOOTHING,
     EXPECTED_CORPUS_OBSERVATION_END,
+    EXPERIMENT_ID,
+    EXPERIMENT_MODELS,
+    EXPERIMENT_SEEDS,
     FEATURE_BASE_PATH,
+    PRIMARY_EXPERIMENT_SEED,
+    PRIMARY_METRIC,
+    SGD_ALPHA_CANDIDATES,
+    SGD_EPOCHS,
     TABLES_DIR,
-    TEMPORAL_FIRST_VALIDATION_START,
     TEMPORAL_FOLDS,
-    TEMPORAL_STEP_MONTHS,
-    TEMPORAL_TEST_MONTHS,
-    TEMPORAL_TRAIN_START,
-    TEMPORAL_VALIDATION_MONTHS,
-    TUNING_TRAIN_END,
-    TUNING_VALIDATION_END,
-    TUNING_VALIDATION_START,
-    create_project_directories,
+    THRESHOLD_FIT_SPLIT,
 )
-from consumerbr_resolution.experiments.temporal_design import (
-    generate_temporal_folds,
-    generate_test_window_candidates,
-    validate_temporal_folds,
-)
+from consumerbr_resolution.experiments.temporal_design import get_temporal_windows
 
 
-TEMPORAL_PROTOCOL_PATH = (
-    TABLES_DIR / "temporal_protocol.csv"
-)
-
-TEMPORAL_FOLD_SUMMARY_PATH = (
-    TABLES_DIR / "temporal_fold_summary.csv"
-)
-
-TEMPORAL_PROTOCOL_AUDIT_PATH = (
-    TABLES_DIR / "temporal_protocol_audit.csv"
-)
-
-TEMPORAL_TEST_WINDOW_ELIGIBILITY_PATH = (
-    TABLES_DIR
-    / "temporal_test_window_eligibility.csv"
-)
+REQUIRED_COLUMNS = {
+    "record_id", "complaint_id", "opening_date", "target_resolved", "complaint_text"
+}
 
 
-def write_csv(
-    path,
-    fieldnames,
-    rows,
-):
-    temporary_path = path.with_suffix(
-        path.suffix + ".part"
-    )
-
-    if temporary_path.exists():
-        temporary_path.unlink()
-
-    with temporary_path.open(
-        "w",
-        newline="",
-        encoding="utf-8",
-    ) as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=fieldnames,
-        )
-
+def write_csv(path, rows):
+    temporary = path.with_suffix(path.suffix + ".part")
+    with temporary.open("w", newline="", encoding="utf-8") as file:
+        writer = csv.DictWriter(file, fieldnames=list(rows[0]))
         writer.writeheader()
         writer.writerows(rows)
-
-    temporary_path.replace(path)
-
-
-def get_dataset_bounds(
-    connection,
-    source_path,
-):
-    row = connection.execute(
-        f"""
-        SELECT
-            COUNT(*),
-            MIN(opening_date),
-            MAX(opening_date)
-        FROM read_parquet('{source_path}')
-        """
-    ).fetchone()
-
-    return {
-        "complaint_count": int(row[0]),
-        "first_opening_date": row[1],
-        "last_opening_date": row[2],
-    }
+    temporary.replace(path)
 
 
-def get_split_summary(
-    connection,
-    source_path,
-    fold_number,
-    split,
-    start_date,
-    end_date,
-):
-    row = connection.execute(
-        f"""
-        SELECT
-            COUNT(*),
-            SUM(
-                CASE
-                    WHEN target_resolved = 1
-                        THEN 1
-                    ELSE 0
-                END
-            ),
-            SUM(
-                CASE
-                    WHEN target_resolved = 0
-                        THEN 1
-                    ELSE 0
-                END
-            ),
-            AVG(target_resolved),
-            MIN(opening_date),
-            MAX(opening_date)
-        FROM read_parquet('{source_path}')
-        WHERE opening_date BETWEEN
-            DATE '{start_date}'
-            AND DATE '{end_date}'
-        """
-    ).fetchone()
-
-    return {
-        "fold": fold_number,
-        "split": split,
-        "start_date": start_date,
-        "end_date": end_date,
-        "complaint_count": int(row[0]),
-        "resolved_count": int(
-            row[1] or 0
-        ),
-        "unresolved_count": int(
-            row[2] or 0
-        ),
-        "resolution_rate": (
-            float(row[3])
-            if row[3] is not None
-            else None
-        ),
-        "first_opening_date": row[4],
-        "last_opening_date": row[5],
-    }
-
-
-def build_temporal_protocol():
-    create_project_directories()
-
-    if not FEATURE_BASE_PATH.exists():
-        raise FileNotFoundError(
-            "Feature base was not found: "
-            f"{FEATURE_BASE_PATH}"
-        )
-
-    print(
-        "Building and auditing temporal "
-        "evaluation protocol"
+def build_temporal_protocol(source_path=None, output_dir=None):
+    source = Path(source_path) if source_path is not None else FEATURE_BASE_PATH
+    destination = Path(output_dir) if output_dir is not None else TABLES_DIR
+    if not source.is_file():
+        raise FileNotFoundError(f"Feature base was not found: {source}")
+    windows = get_temporal_windows(
+        TEMPORAL_FOLDS[0], EXPECTED_CORPUS_OBSERVATION_END
     )
+    summary_rows = []
+    audit_rows = []
+    overlap_rows = []
+    destination.mkdir(parents=True, exist_ok=True)
 
-    print(
-        f"Source: {FEATURE_BASE_PATH}"
-    )
-
-    source_path = str(
-        FEATURE_BASE_PATH
-    ).replace("'", "''")
-
-    connection = duckdb.connect()
-
-    try:
-        bounds = get_dataset_bounds(
-            connection=connection,
-            source_path=source_path,
+    with duckdb.connect(config={"memory_limit": "8GB", "threads": "4"}) as connection:
+        escaped_source = str(source).replace("'", "''")
+        connection.execute(
+            f"CREATE VIEW feature_base AS SELECT * FROM read_parquet('{escaped_source}')"
         )
-
-        dataset_start = (
-            bounds[
-                "first_opening_date"
-            ]
+        columns = {row[0] for row in connection.execute("DESCRIBE feature_base").fetchall()}
+        missing = REQUIRED_COLUMNS - columns
+        if missing:
+            raise ValueError(f"Missing feature columns: {sorted(missing)}")
+        clauses = " ".join(
+            f"WHEN opening_date BETWEEN DATE '{window['start_date']}' "
+            f"AND DATE '{window['end_date']}' THEN '{window['split']}'"
+            for window in windows
         )
-
-        dataset_end = (
-            bounds[
-                "last_opening_date"
-            ]
+        connection.execute(
+            f"CREATE VIEW assigned AS SELECT *, CASE {clauses} "
+            "ELSE 'outside_period' END AS protocol_split FROM feature_base"
         )
-
-        if (
-            dataset_start is None
-            or dataset_end is None
-        ):
-            raise RuntimeError(
-                "Feature base is empty."
-            )
-
-        observed_start = (
-            dataset_start.isoformat()
+        total, unique_ids, invalid = connection.execute(
+            "SELECT COUNT(*), COUNT(DISTINCT record_id), "
+            "COUNT(*) FILTER (WHERE record_id IS NULL OR complaint_id IS NULL "
+            "OR opening_date IS NULL OR target_resolved IS NULL "
+            "OR target_resolved NOT IN (0, 1) OR complaint_text IS NULL) FROM assigned"
+        ).fetchone()
+        outside = connection.execute(
+            "SELECT COUNT(*) FROM assigned WHERE protocol_split = 'outside_period'"
+        ).fetchone()[0]
+        crossing = connection.execute(
+            "SELECT COUNT(*) FROM (SELECT complaint_id FROM assigned "
+            "WHERE protocol_split IN ('train', 'validation', 'test') "
+            "GROUP BY complaint_id HAVING COUNT(DISTINCT protocol_split) > 1)"
+        ).fetchone()[0]
+        checks = (
+            ("nonempty_source", total, total > 0),
+            ("unique_record_ids", total - unique_ids, total == unique_ids),
+            ("valid_required_values", invalid, invalid == 0),
+            ("dates_inside_observation_horizon", outside, outside == 0),
+            ("complaint_ids_do_not_cross_partitions", crossing, crossing == 0),
         )
-
-        observed_end = (
-            dataset_end.isoformat()
+        audit_rows.extend(
+            {"criterion": name, "value": value, "passed": passed}
+            for name, value, passed in checks
         )
-
-        if (
-            observed_start
-            != TEMPORAL_TRAIN_START
-        ):
-            raise RuntimeError(
-                "Observed dataset start does "
-                "not match configuration: "
-                f"observed={observed_start}, "
-                f"configured="
-                f"{TEMPORAL_TRAIN_START}."
-            )
-
-        if (
-            observed_end
-            != EXPECTED_CORPUS_OBSERVATION_END
-        ):
-            raise RuntimeError(
-                "Observed dataset end does "
-                "not match the expected "
-                "corpus end: "
-                f"observed={observed_end}, "
-                f"expected="
-                f"{EXPECTED_CORPUS_OBSERVATION_END}."
-            )
-
-        actual_folds = (
-            generate_temporal_folds(
-                first_validation_start=(
-                    TEMPORAL_FIRST_VALIDATION_START
-                ),
-                observation_end=(
-                    observed_end
-                ),
-                validation_months=(
-                    TEMPORAL_VALIDATION_MONTHS
-                ),
-                test_months=(
-                    TEMPORAL_TEST_MONTHS
-                ),
-                step_months=(
-                    TEMPORAL_STEP_MONTHS
-                ),
-            )
-        )
-
-        validate_temporal_folds(
-            actual_folds
-        )
-
-        if actual_folds != TEMPORAL_FOLDS:
-            raise RuntimeError(
-                "Configured temporal folds "
-                "do not match the folds "
-                "supported by the dataset."
-            )
-
-        tuning_train_end = date.fromisoformat(
-            TUNING_TRAIN_END
-        )
-
-        tuning_validation_start = (
-            date.fromisoformat(
-                TUNING_VALIDATION_START
-            )
-        )
-
-        tuning_end = date.fromisoformat(
-            TUNING_VALIDATION_END
-        )
-
-        first_evaluation_date = (
-            date.fromisoformat(
-                TEMPORAL_FIRST_VALIDATION_START
-            )
-        )
-
-        if (
-            tuning_train_end
-            + timedelta(days=1)
-            != tuning_validation_start
-        ):
-            raise RuntimeError(
-                "Tuning train and validation "
-                "windows are not contiguous."
-            )
-
-        if (
-            tuning_end
-            + timedelta(days=1)
-            != first_evaluation_date
-        ):
-            raise RuntimeError(
-                "Tuning validation and temporal "
-                "evaluation are not contiguous."
-            )
-
-        protocol_rows = []
-        fold_summary_rows = []
-
-        for fold in actual_folds:
-            fold_number = fold["fold"]
-
-            protocol_rows.append(
-                {
-                    "fold": fold_number,
-                    "train_start": (
-                        TEMPORAL_TRAIN_START
-                    ),
-                    "train_end": (
-                        fold["train_end"]
-                    ),
-                    "validation_start": (
-                        fold[
-                            "validation_start"
-                        ]
-                    ),
-                    "validation_end": (
-                        fold[
-                            "validation_end"
-                        ]
-                    ),
-                    "test_start": (
-                        fold["test_start"]
-                    ),
-                    "test_end": (
-                        fold["test_end"]
-                    ),
-                }
-            )
-
-            split_specs = (
-                (
-                    "train",
-                    TEMPORAL_TRAIN_START,
-                    fold["train_end"],
-                ),
-                (
-                    "validation",
-                    fold[
-                        "validation_start"
-                    ],
-                    fold[
-                        "validation_end"
-                    ],
-                ),
-                (
-                    "test",
-                    fold["test_start"],
-                    fold["test_end"],
-                ),
-            )
-
-            for (
-                split,
-                start_date,
-                end_date,
-            ) in split_specs:
-                summary = (
-                    get_split_summary(
-                        connection=connection,
-                        source_path=source_path,
-                        fold_number=(
-                            fold_number
-                        ),
-                        split=split,
-                        start_date=(
-                            start_date
-                        ),
-                        end_date=end_date,
-                    )
-                )
-
-                if (
-                    summary[
-                        "complaint_count"
-                    ]
-                    == 0
-                ):
-                    raise RuntimeError(
-                        f"Fold {fold_number} "
-                        f"{split} split is empty."
-                    )
-
-                if (
-                    summary[
-                        "resolved_count"
-                    ]
-                    == 0
-                ):
-                    raise RuntimeError(
-                        f"Fold {fold_number} "
-                        f"{split} has no "
-                        "resolved cases."
-                    )
-
-                if (
-                    summary[
-                        "unresolved_count"
-                    ]
-                    == 0
-                ):
-                    raise RuntimeError(
-                        f"Fold {fold_number} "
-                        f"{split} has no "
-                        "unresolved cases."
-                    )
-
-                fold_summary_rows.append(
-                    summary
-                )
-
-        candidates = (
-            generate_test_window_candidates(
-                first_test_start=(
-                    actual_folds[0][
-                        "test_start"
-                    ]
-                ),
-                observation_end=(
-                    observed_end
-                ),
-                test_months=(
-                    TEMPORAL_TEST_MONTHS
-                ),
-                step_months=(
-                    TEMPORAL_STEP_MONTHS
-                ),
-            )
-        )
-
-        eligibility_rows = []
-
-        for candidate in candidates:
-            row = connection.execute(
-                f"""
-                SELECT
-                    COUNT(*),
-                    MIN(opening_date),
-                    MAX(opening_date)
-                FROM read_parquet(
-                    '{source_path}'
-                )
-                WHERE opening_date BETWEEN
-                    DATE '{
-                        candidate[
-                            "test_start"
-                        ]
-                    }'
-                    AND DATE '{
-                        candidate[
-                            "test_end"
-                        ]
-                    }'
-                """
+        for window in windows:
+            count, resolved, unresolved = connection.execute(
+                "SELECT COUNT(*), COUNT(*) FILTER (WHERE target_resolved = 1), "
+                "COUNT(*) FILTER (WHERE target_resolved = 0) "
+                "FROM assigned WHERE protocol_split = ?",
+                [window["split"]],
             ).fetchone()
-
-            eligibility_rows.append(
-                {
-                    "candidate": (
-                        candidate[
-                            "candidate"
-                        ]
-                    ),
-                    "test_start": (
-                        candidate[
-                            "test_start"
-                        ]
-                    ),
-                    "test_end": (
-                        candidate[
-                            "test_end"
-                        ]
-                    ),
-                    "complete": (
-                        candidate[
-                            "complete"
-                        ]
-                    ),
-                    "included": (
-                        candidate[
-                            "included"
-                        ]
-                    ),
-                    "complaint_count": (
-                        int(row[0])
-                    ),
-                    "first_opening_date": (
-                        row[1]
-                    ),
-                    "last_opening_date": (
-                        row[2]
-                    ),
-                }
-            )
-
-        complete_candidates = [
-            row
-            for row
-            in eligibility_rows
-            if row["complete"]
-        ]
-
-        incomplete_candidates = [
-            row
-            for row
-            in eligibility_rows
-            if not row["complete"]
-        ]
-
-        if (
-            len(complete_candidates)
-            != len(actual_folds)
-        ):
-            raise RuntimeError(
-                "Complete test-window count "
-                "does not match generated "
-                "fold count."
-            )
-
-        if (
-            len(incomplete_candidates)
-            != 1
-        ):
-            raise RuntimeError(
-                "Expected exactly one next "
-                "incomplete test window."
-            )
-
-        expected_numbers = list(
-            range(
-                1,
-                len(actual_folds) + 1,
-            )
+            summary_rows.append({
+                **window,
+                "complaint_count": count,
+                "resolved_count": resolved,
+                "unresolved_count": unresolved,
+                "resolution_rate": resolved / count if count else None,
+            })
+            if window["included"]:
+                audit_rows.append({
+                    "criterion": f"both_classes_in_{window['split']}",
+                    "value": f"{resolved}/{unresolved}",
+                    "passed": resolved > 0 and unresolved > 0,
+                })
+        audit_rows.append({
+            "criterion": "all_rows_accounted_for",
+            "value": sum(row["complaint_count"] for row in summary_rows),
+            "passed": sum(row["complaint_count"] for row in summary_rows) == total,
+        })
+        for left, right in (("train", "validation"), ("train", "test"), ("validation", "test")):
+            shared = connection.execute(
+                "SELECT COUNT(*) FROM (SELECT complaint_text FROM assigned "
+                "WHERE protocol_split IN (?, ?) GROUP BY complaint_text "
+                "HAVING COUNT(DISTINCT protocol_split) = 2)",
+                [left, right],
+            ).fetchone()[0]
+            overlap_rows.append({
+                "left_split": left,
+                "right_split": right,
+                "shared_exact_texts": shared,
+            })
+        write_csv(destination / "temporal_protocol_audit.csv", audit_rows)
+        failed = [row["criterion"] for row in audit_rows if not row["passed"]]
+        if failed:
+            raise RuntimeError(f"Temporal audit failed: {', '.join(failed)}")
+        membership = destination / "split_membership.parquet"
+        temporary = membership.with_suffix(".parquet.part")
+        escaped = str(temporary).replace("'", "''")
+        connection.execute(
+            "COPY (SELECT record_id, complaint_id, opening_date, target_resolved, "
+            "protocol_split AS split FROM assigned ORDER BY record_id) "
+            f"TO '{escaped}' (FORMAT PARQUET, COMPRESSION ZSTD)"
         )
+        temporary.replace(membership)
 
-        observed_numbers = [
-            fold["fold"]
-            for fold
-            in actual_folds
-        ]
-
-        next_candidate = (
-            incomplete_candidates[0]
-        )
-
-        audit_rows = [
-            {
-                "criterion": (
-                    "dataset_start_matches_configuration"
-                ),
-                "value": observed_start,
-                "passed": (
-                    observed_start
-                    == TEMPORAL_TRAIN_START
-                ),
-            },
-            {
-                "criterion": (
-                    "dataset_end_matches_expected_corpus_end"
-                ),
-                "value": observed_end,
-                "passed": (
-                    observed_end
-                    == EXPECTED_CORPUS_OBSERVATION_END
-                ),
-            },
-            {
-                "criterion": (
-                    "tuning_precedes_evaluation"
-                ),
-                "value": (
-                    f"{TUNING_VALIDATION_END} "
-                    f"< "
-                    f"{TEMPORAL_FIRST_VALIDATION_START}"
-                ),
-                "passed": (
-                    tuning_end
-                    < first_evaluation_date
-                ),
-            },
-            {
-                "criterion": (
-                    "validation_window_months"
-                ),
-                "value": (
-                    TEMPORAL_VALIDATION_MONTHS
-                ),
-                "passed": (
-                    TEMPORAL_VALIDATION_MONTHS
-                    == 3
-                ),
-            },
-            {
-                "criterion": (
-                    "test_window_months"
-                ),
-                "value": (
-                    TEMPORAL_TEST_MONTHS
-                ),
-                "passed": (
-                    TEMPORAL_TEST_MONTHS
-                    == 3
-                ),
-            },
-            {
-                "criterion": (
-                    "step_months"
-                ),
-                "value": (
-                    TEMPORAL_STEP_MONTHS
-                ),
-                "passed": (
-                    TEMPORAL_STEP_MONTHS
-                    == 3
-                ),
-            },
-            {
-                "criterion": (
-                    "fold_numbering_is_contiguous"
-                ),
-                "value": ",".join(
-                    map(
-                        str,
-                        observed_numbers,
-                    )
-                ),
-                "passed": (
-                    observed_numbers
-                    == expected_numbers
-                ),
-            },
-            {
-                "criterion": (
-                    "complete_test_window_count"
-                ),
-                "value": (
-                    len(
-                        complete_candidates
-                    )
-                ),
-                "passed": (
-                    len(
-                        complete_candidates
-                    )
-                    == len(actual_folds)
-                ),
-            },
-            {
-                "criterion": (
-                    "next_test_window_is_incomplete"
-                ),
-                "value": (
-                    f"{next_candidate['test_start']}"
-                    f".."
-                    f"{next_candidate['test_end']}"
-                ),
-                "passed": (
-                    not next_candidate[
-                        "complete"
-                    ]
-                ),
-            },
-        ]
-
-        if not all(
-            bool(row["passed"])
-            for row
-            in audit_rows
-        ):
-            raise RuntimeError(
-                "Temporal protocol audit failed."
-            )
-
-    finally:
-        connection.close()
-
-    write_csv(
-        TEMPORAL_PROTOCOL_PATH,
-        [
-            "fold",
-            "train_start",
-            "train_end",
-            "validation_start",
-            "validation_end",
-            "test_start",
-            "test_end",
-        ],
-        protocol_rows,
+    write_csv(destination / "temporal_split_summary.csv", summary_rows)
+    write_csv(destination / "temporal_text_overlap.csv", overlap_rows)
+    specification = {
+        "experiment_id": EXPERIMENT_ID,
+        "source_path": str(source),
+        "source_size_bytes": source.stat().st_size,
+        "source_mtime_ns": source.stat().st_mtime_ns,
+        "observation_end": EXPECTED_CORPUS_OBSERVATION_END,
+        "windows": windows,
+        "models": EXPERIMENT_MODELS,
+        "seeds": EXPERIMENT_SEEDS,
+        "selection_seed": PRIMARY_EXPERIMENT_SEED,
+        "primary_metric": PRIMARY_METRIC,
+        "threshold_fit_split": THRESHOLD_FIT_SPLIT,
+        "sgd_alpha_candidates": SGD_ALPHA_CANDIDATES,
+        "sgd_max_epochs": SGD_EPOCHS,
+        "bertimbau_learning_rate_candidates": BERTIMBAU_LEARNING_RATE_CANDIDATES,
+        "bertimbau_max_epochs": BERTIMBAU_EPOCHS,
+        "company_history_smoothing": COMPANY_HISTORY_SMOOTHING,
+        "bootstrap_replicates": BOOTSTRAP_REPLICATES,
+        "prior_test_inspection": True,
+        "gap_is_label_maturation_approximation": True,
+    }
+    output = destination / "experimental_protocol.json"
+    temporary = output.with_suffix(".json.part")
+    temporary.write_text(
+        json.dumps(specification, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
     )
-
-    write_csv(
-        TEMPORAL_FOLD_SUMMARY_PATH,
-        [
-            "fold",
-            "split",
-            "start_date",
-            "end_date",
-            "complaint_count",
-            "resolved_count",
-            "unresolved_count",
-            "resolution_rate",
-            "first_opening_date",
-            "last_opening_date",
-        ],
-        fold_summary_rows,
-    )
-
-    write_csv(
-        TEMPORAL_TEST_WINDOW_ELIGIBILITY_PATH,
-        [
-            "candidate",
-            "test_start",
-            "test_end",
-            "complete",
-            "included",
-            "complaint_count",
-            "first_opening_date",
-            "last_opening_date",
-        ],
-        eligibility_rows,
-    )
-
-    write_csv(
-        TEMPORAL_PROTOCOL_AUDIT_PATH,
-        [
-            "criterion",
-            "value",
-            "passed",
-        ],
-        audit_rows,
-    )
-
-    print(
-        "Temporal protocol completed "
-        "and audited."
-    )
-
-    print(
-        f"Saved to: "
-        f"{TEMPORAL_PROTOCOL_PATH}"
-    )
-
-    print(
-        f"Saved to: "
-        f"{TEMPORAL_FOLD_SUMMARY_PATH}"
-    )
-
-    print(
-        f"Saved to: "
-        f"{TEMPORAL_TEST_WINDOW_ELIGIBILITY_PATH}"
-    )
-
-    print(
-        f"Saved to: "
-        f"{TEMPORAL_PROTOCOL_AUDIT_PATH}"
-    )
+    temporary.replace(output)
+    print(f"Temporal protocol audited: {destination}")
+    for row in summary_rows:
+        print(f"{row['split']}: {row['complaint_count']} records")
+    return summary_rows

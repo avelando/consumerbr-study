@@ -65,6 +65,12 @@ STAGES = [
         "data.selection_bias",
         "analyze_outcome_observation",
     ),
+    Stage(
+        "temporal-protocol",
+        "Build and audit the single temporal split",
+        "experiments.temporal_protocol",
+        "build_temporal_protocol",
+    ),
 ]
 
 
