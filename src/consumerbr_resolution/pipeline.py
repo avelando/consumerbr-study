@@ -75,6 +75,8 @@ STAGES = [
           "experiments.reproducibility", "register_execution"),
     Stage("company-baseline", "Evaluate smoothed historical company rate",
           "baselines", "evaluate_historical_baselines"),
+    Stage("tfidf-sgd", "Select and evaluate word TF-IDF + SGD",
+          "modeling.tfidf_sgd", "evaluate_tfidf_sgd"),
     Stage("export-reports", "Export aggregate reports for publication",
           "experiments.report_export", "export_reports"),
 ]
@@ -112,4 +114,4 @@ def run_all():
     print(f"Running {len(STAGES)} implemented stages in sequence.")
     for stage_number, stage in enumerate(STAGES, start=1):
         execute_stage(stage_number, stage)
-    print("Implemented stages completed. TF-IDF and transformer experiments are pending.")
+    print("Implemented stages completed. Transformer experiments and comparative analyses are pending.")

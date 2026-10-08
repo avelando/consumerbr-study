@@ -1,762 +1,224 @@
-import csv
-import time
+import json
+from pathlib import Path
 
 import duckdb
 import joblib
 import numpy as np
+import pandas as pd
 from sklearn.linear_model import SGDClassifier
+from threadpoolctl import threadpool_limits
 from tqdm import tqdm
 
+from consumerbr_resolution.baselines import write_predictions
 from consumerbr_resolution.config import (
-    FEATURE_BASE_PATH,
-    METRICS_DIR,
-    PREDICTIONS_DIR,
-    RANDOM_SEED,
-    SGD_BATCH_SIZE,
-    SGD_EPOCHS,
-    SGD_LOSS,
-    SGD_PENALTY,
-    TEMPORAL_FOLDS,
-    TFIDF_MODELS_DIR,
-    TFIDF_SGD_MODELS_DIR,
-    create_project_directories,
+    EXPERIMENT_SEEDS, FEATURE_BASE_PATH, PRIMARY_EXPERIMENT_SEED, PROJECT_ROOT,
+    SGD_ALPHA_CANDIDATES, SGD_BATCH_SIZE, SGD_EPOCHS, SGD_LOSS, SGD_PENALTY, TABLES_DIR,
 )
 from consumerbr_resolution.evaluation.metrics import (
-    calculate_binary_metrics,
-    find_best_macro_f1_threshold,
+    calculate_binary_metrics, find_best_macro_f1_threshold,
 )
-from consumerbr_resolution.modeling.hyperparameter_selection import (
-    get_selected_sgd_alpha,
+from consumerbr_resolution.experiments.reproducibility import (
+    sha256_file, validate_execution, write_json,
+)
+from consumerbr_resolution.experiments.temporal_protocol import write_csv
+from consumerbr_resolution.modeling.tfidf import create_tfidf_vectorizer, load_split
+
+
+REPORTS = (
+    "tfidf_sgd_selection.csv", "tfidf_sgd_training_history.csv",
+    "tfidf_sgd_metrics.csv", "tfidf_sgd_summary.csv", "tfidf_sgd_run.json",
 )
 
 
-TFIDF_SGD_METRICS_DIR = METRICS_DIR / "tfidf_sgd"
-TFIDF_SGD_METRICS_PATH = METRICS_DIR / "tfidf_sgd_metrics.csv"
-TFIDF_SGD_PREDICTIONS_DIR = PREDICTIONS_DIR / "tfidf_sgd"
+def verify_artifacts(record, root, fingerprint):
+    if record["fingerprint"] != fingerprint or not record["artifacts"]:
+        raise RuntimeError("TF-IDF execution does not match the registered inputs.")
+    for name, digest in record["artifacts"].items():
+        path = Path(root) / name
+        if not path.is_file() or sha256_file(path) != digest:
+            raise RuntimeError(f"TF-IDF artifacts changed: {name}")
 
 
-METRIC_FIELDS = [
-    "fold",
-    "split",
-    "model",
-    "threshold_source",
-    "threshold",
-    "epochs",
-    "alpha",
-    "training_seconds",
-    "scoring_seconds",
-    "accuracy",
-    "balanced_accuracy",
-    "precision_resolved",
-    "recall_resolved",
-    "f1_resolved",
-    "precision_unresolved",
-    "recall_unresolved",
-    "f1_unresolved",
-    "macro_f1",
-    "roc_auc",
-    "pr_auc",
-    "brier_score",
-]
+def artifact_hashes(paths, root):
+    return {path.relative_to(root).as_posix(): sha256_file(path) for path in paths}
 
 
-def get_document_count(
-    connection,
-    source_path,
-    start_date=None,
-    end_date=None,
-):
-    conditions = []
-
-    if start_date is not None:
-        conditions.append(
-            f"opening_date >= DATE '{start_date}'"
-        )
-
-    if end_date is not None:
-        conditions.append(
-            f"opening_date <= DATE '{end_date}'"
-        )
-
-    where_clause = " AND ".join(conditions)
-
-    result = connection.execute(
-        f"""
-        SELECT COUNT(*)
-        FROM read_parquet('{source_path}')
-        WHERE {where_clause}
-        """
-    ).fetchone()
-
-    return int(result[0])
+def save_model(model, path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".part")
+    joblib.dump(model, temporary, compress=3)
+    temporary.replace(path)
 
 
-def iter_batches(
-    connection,
-    source_path,
-    start_date=None,
-    end_date=None,
-    include_metadata=False,
-):
-    conditions = []
-
-    if start_date is not None:
-        conditions.append(
-            f"opening_date >= DATE '{start_date}'"
-        )
-
-    if end_date is not None:
-        conditions.append(
-            f"opening_date <= DATE '{end_date}'"
-        )
-
-    where_clause = " AND ".join(conditions)
-
-    if include_metadata:
-        columns = """
-            record_id,
-            complaint_id,
-            opening_date,
-            complaint_text,
-            target_resolved
-        """
-    else:
-        columns = """
-            complaint_text,
-            target_resolved
-        """
-
-    cursor = connection.execute(
-        f"""
-        SELECT
-            {columns}
-        FROM read_parquet('{source_path}')
-        WHERE {where_clause}
-        """
+def train_candidate(x_train, y_train, x_validation, y_validation,
+                    alpha, seed, directory, root, fingerprint, vectorizer_path):
+    completion = directory / "run.json"
+    model_path = directory / "model.joblib"
+    if completion.exists():
+        result = json.loads(completion.read_text(encoding="utf-8"))
+        verify_artifacts(result, root, fingerprint)
+        if result["alpha"] != alpha or result["seed"] != seed:
+            raise RuntimeError("Cached training parameters do not match.")
+        print(f"Training reused: alpha={alpha:g}, seed={seed}", flush=True)
+        return result
+    model = SGDClassifier(
+        loss=SGD_LOSS, penalty=SGD_PENALTY, alpha=alpha,
+        random_state=seed, shuffle=False,
     )
-
-    while True:
-        rows = cursor.fetchmany(SGD_BATCH_SIZE)
-
-        if not rows:
-            break
-
-        yield rows
-
-
-def create_sgd_classifier(alpha):
-    return SGDClassifier(
-        loss=SGD_LOSS,
-        penalty=SGD_PENALTY,
-        alpha=alpha,
-        random_state=RANDOM_SEED,
-    )
-
-
-def train_sgd(
-    connection,
-    source_path,
-    train_end,
-    vectorizer,
-    model,
-    train_document_count,
-):
-    classes = np.array(
-        [0, 1],
-        dtype=np.int8,
-    )
-
-    first_batch = True
-    start_time = time.perf_counter()
-
+    generator = np.random.default_rng(seed)
+    history, best = [], None
     for epoch in range(1, SGD_EPOCHS + 1):
-        progress = tqdm(
-            total=train_document_count,
-            desc=f"Epoch {epoch}/{SGD_EPOCHS}",
-            unit="docs",
-            dynamic_ncols=True,
-        )
-
-        try:
-            for rows in iter_batches(
-                connection=connection,
-                source_path=source_path,
-                end_date=train_end,
-            ):
-                texts = [
-                    row[0]
-                    for row in rows
-                ]
-
-                targets = np.asarray(
-                    [
-                        row[1]
-                        for row in rows
-                    ],
-                    dtype=np.int8,
-                )
-
-                features = vectorizer.transform(
-                    texts
-                )
-
-                if first_batch:
-                    model.partial_fit(
-                        features,
-                        targets,
-                        classes=classes,
-                    )
-                    first_batch = False
-                else:
-                    model.partial_fit(
-                        features,
-                        targets,
-                    )
-
-                progress.update(
-                    len(rows)
-                )
-        finally:
-            progress.close()
-
-    return time.perf_counter() - start_time
-
-
-def score_split(
-    connection,
-    source_path,
-    start_date,
-    end_date,
-    vectorizer,
-    model,
-    collect_metadata=False,
-):
-    targets = []
-    scores = []
-
-    record_ids = []
-    complaint_ids = []
-    opening_dates = []
-
-    document_count = get_document_count(
-        connection=connection,
-        source_path=source_path,
-        start_date=start_date,
-        end_date=end_date,
-    )
-
-    progress = tqdm(
-        total=document_count,
-        desc="Scoring",
-        unit="docs",
-        dynamic_ncols=True,
-    )
-
-    start_time = time.perf_counter()
-
-    try:
-        for rows in iter_batches(
-            connection=connection,
-            source_path=source_path,
-            start_date=start_date,
-            end_date=end_date,
-            include_metadata=collect_metadata,
-        ):
-            if collect_metadata:
-                texts = [
-                    row[3]
-                    for row in rows
-                ]
-
-                batch_targets = np.asarray(
-                    [
-                        row[4]
-                        for row in rows
-                    ],
-                    dtype=np.int8,
-                )
-
-                record_ids.extend(
-                    row[0]
-                    for row in rows
-                )
-
-                complaint_ids.extend(
-                    row[1]
-                    for row in rows
-                )
-
-                opening_dates.extend(
-                    row[2]
-                    for row in rows
-                )
-            else:
-                texts = [
-                    row[0]
-                    for row in rows
-                ]
-
-                batch_targets = np.asarray(
-                    [
-                        row[1]
-                        for row in rows
-                    ],
-                    dtype=np.int8,
-                )
-
-            features = vectorizer.transform(
-                texts
-            )
-
-            batch_scores = model.predict_proba(
-                features
-            )[:, 1]
-
-            targets.append(
-                batch_targets
-            )
-
-            scores.append(
-                batch_scores
-            )
-
-            progress.update(
-                len(rows)
-            )
-    finally:
-        progress.close()
-
-    scoring_seconds = (
-        time.perf_counter()
-        - start_time
-    )
-
+        order = generator.permutation(len(y_train))
+        batches = range(0, len(order), SGD_BATCH_SIZE)
+        for start in tqdm(batches, desc=f"alpha={alpha:g} seed={seed} epoch={epoch}"):
+            indices = order[start:start + SGD_BATCH_SIZE]
+            model.partial_fit(x_train[indices], y_train[indices], classes=np.array([0, 1]))
+        score = model.predict_proba(x_validation)[:, 1]
+        threshold, macro_f1 = find_best_macro_f1_threshold(y_validation, score)
+        history.append({
+            "alpha": alpha, "seed": seed, "epoch": epoch,
+            "validation_macro_f1": macro_f1, "threshold": threshold,
+        })
+        if best is None or macro_f1 > best["validation_macro_f1"]:
+            best = dict(history[-1])
+            save_model(model, model_path)
+        print(f"Validation Macro-F1={macro_f1:.4f}; best epoch={best['epoch']}", flush=True)
     result = {
-        "target": np.concatenate(
-            targets
-        ),
-        "score": np.concatenate(
-            scores
-        ),
-        "scoring_seconds": (
-            scoring_seconds
-        ),
+        "fingerprint": fingerprint, **best, "history": history,
+        "model_path": model_path.relative_to(root).as_posix(),
+        "artifacts": artifact_hashes([model_path, vectorizer_path], root),
     }
-
-    if collect_metadata:
-        result["record_id"] = record_ids
-        result["complaint_id"] = complaint_ids
-        result["opening_date"] = opening_dates
-
+    write_json(completion, result)
     return result
 
 
-def write_predictions(
-    connection,
-    prediction_path,
-    result,
-    threshold,
-):
-    temporary_csv_path = (
-        prediction_path.with_suffix(
-            ".csv.part"
-        )
-    )
-
-    temporary_parquet_path = (
-        prediction_path.with_suffix(
-            ".parquet.part"
-        )
-    )
-
-    if temporary_csv_path.exists():
-        temporary_csv_path.unlink()
-
-    if temporary_parquet_path.exists():
-        temporary_parquet_path.unlink()
-
-    predictions = (
-        result["score"] >= threshold
-    ).astype(np.int8)
-
-    with temporary_csv_path.open(
-        "w",
-        newline="",
-        encoding="utf-8",
-    ) as file:
-        writer = csv.writer(file)
-
-        writer.writerow(
-            [
-                "record_id",
-                "complaint_id",
-                "opening_date",
-                "target_resolved",
-                "score",
-                "prediction",
-            ]
-        )
-
-        for index in range(
-            len(result["target"])
-        ):
-            writer.writerow(
-                [
-                    result["record_id"][index],
-                    result["complaint_id"][index],
-                    result["opening_date"][index],
-                    int(
-                        result["target"][index]
-                    ),
-                    float(
-                        result["score"][index]
-                    ),
-                    int(
-                        predictions[index]
-                    ),
-                ]
+def evaluate_tfidf_sgd(root=None, source=None, tables=None):
+    root = Path(root) if root is not None else PROJECT_ROOT
+    source = Path(source) if source is not None else FEATURE_BASE_PATH
+    tables = Path(tables) if tables is not None else TABLES_DIR
+    manifest = validate_execution(root, source, tables)
+    fingerprint = manifest["fingerprint"]
+    protocol = manifest["identity"]["protocol"]
+    expected = {
+        "seeds": list(EXPERIMENT_SEEDS), "selection_seed": PRIMARY_EXPERIMENT_SEED,
+        "sgd_alpha_candidates": list(SGD_ALPHA_CANDIDATES), "sgd_max_epochs": SGD_EPOCHS,
+    }
+    if any(protocol[key] != value for key, value in expected.items()):
+        raise RuntimeError("Registered SGD protocol does not match configuration.")
+    completion = tables / "tfidf_sgd_run.json"
+    if completion.exists():
+        result = json.loads(completion.read_text(encoding="utf-8"))
+        verify_artifacts(result, root, fingerprint)
+        print("TF-IDF + SGD already completed; artifact hashes verified.")
+        return result
+    models = root / "models" / tables.parent.name / "classical/tfidf_sgd"
+    predictions = tables.parent / "predictions/tfidf_sgd"
+    membership = tables / "split_membership.parquet"
+    vectorizer_path = models / "vectorizer.joblib"
+    vectorizer_record = models / "vectorizer_run.json"
+    with threadpool_limits(limits=4), duckdb.connect(
+        config={"memory_limit": "8GB", "threads": "4"},
+    ) as connection:
+        print("Loading training and validation partitions.", flush=True)
+        train = load_split(connection, source, membership, "train")
+        validation = load_split(connection, source, membership, "validation")
+        if vectorizer_record.exists():
+            cached = json.loads(vectorizer_record.read_text(encoding="utf-8"))
+            verify_artifacts(cached, root, fingerprint)
+            vectorizer = joblib.load(vectorizer_path)
+            x_train = vectorizer.transform(train["complaint_text"])
+        else:
+            print("Fitting word TF-IDF on training texts only.", flush=True)
+            vectorizer = create_tfidf_vectorizer()
+            x_train = vectorizer.fit_transform(train["complaint_text"])
+            save_model(vectorizer, vectorizer_path)
+            write_json(vectorizer_record, {
+                "fingerprint": fingerprint, "training_count": len(train),
+                "vocabulary_size": len(vectorizer.vocabulary_),
+                "artifacts": artifact_hashes([vectorizer_path], root),
+            })
+        x_validation = vectorizer.transform(validation["complaint_text"])
+        y_train = train["target_resolved"].to_numpy(dtype=np.int8)
+        y_validation = validation["target_resolved"].to_numpy(dtype=np.int8)
+        del train
+        validation = validation.drop(columns="complaint_text")
+        candidates, runs, artifacts = [], [], [vectorizer_path, vectorizer_record]
+        for index, alpha in enumerate(SGD_ALPHA_CANDIDATES):
+            directory = models / f"candidate_{index:02d}_seed_{PRIMARY_EXPERIMENT_SEED}"
+            result = train_candidate(
+                x_train, y_train, x_validation, y_validation, alpha,
+                PRIMARY_EXPERIMENT_SEED, directory, root, fingerprint, vectorizer_path,
             )
-
-    csv_path = str(
-        temporary_csv_path
-    ).replace("'", "''")
-
-    parquet_path = str(
-        temporary_parquet_path
-    ).replace("'", "''")
-
-    connection.execute(
-        f"""
-        COPY (
-            SELECT *
-            FROM read_csv_auto(
-                '{csv_path}',
-                header=true
-            )
-        )
-        TO '{parquet_path}'
-        (
-            FORMAT PARQUET,
-            COMPRESSION ZSTD
-        )
-        """
-    )
-
-    temporary_csv_path.unlink()
-
-    temporary_parquet_path.replace(
-        prediction_path
-    )
-
-
-def write_fold_metrics(
-    fold_metrics_path,
-    rows,
-):
-    with fold_metrics_path.open(
-        "w",
-        newline="",
-        encoding="utf-8",
-    ) as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=METRIC_FIELDS,
-        )
-
-        writer.writeheader()
-        writer.writerows(rows)
-
-
-def rebuild_aggregate_metrics():
-    rows = []
-
-    for fold in TEMPORAL_FOLDS:
-        fold_number = fold["fold"]
-
-        fold_metrics_path = (
-            TFIDF_SGD_METRICS_DIR
-            / f"fold_{fold_number:02d}.csv"
-        )
-
-        with fold_metrics_path.open(
-            "r",
-            newline="",
-            encoding="utf-8",
-        ) as file:
-            reader = csv.DictReader(file)
-            rows.extend(reader)
-
-    with TFIDF_SGD_METRICS_PATH.open(
-        "w",
-        newline="",
-        encoding="utf-8",
-    ) as file:
-        writer = csv.DictWriter(
-            file,
-            fieldnames=METRIC_FIELDS,
-        )
-
-        writer.writeheader()
-        writer.writerows(rows)
-
-
-def evaluate_tfidf_sgd():
-    create_project_directories()
-
-    TFIDF_SGD_METRICS_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    TFIDF_SGD_PREDICTIONS_DIR.mkdir(
-        parents=True,
-        exist_ok=True,
-    )
-
-    source_path = str(
-        FEATURE_BASE_PATH
-    ).replace("'", "''")
-
-    alpha = get_selected_sgd_alpha()
-
-    print("Evaluating TF-IDF + SGD")
-    print(f"Source: {FEATURE_BASE_PATH}")
-    print(f"Models: {TFIDF_SGD_MODELS_DIR}")
-    print(
-        f"Predictions: "
-        f"{TFIDF_SGD_PREDICTIONS_DIR}"
-    )
-
-    connection = duckdb.connect()
-
-    try:
-        for fold in TEMPORAL_FOLDS:
-            fold_number = fold["fold"]
-
-            model_path = (
-                TFIDF_SGD_MODELS_DIR
-                / f"fold_{fold_number:02d}.joblib"
-            )
-
-            prediction_path = (
-                TFIDF_SGD_PREDICTIONS_DIR
-                / f"fold_{fold_number:02d}.parquet"
-            )
-
-            fold_metrics_path = (
-                TFIDF_SGD_METRICS_DIR
-                / f"fold_{fold_number:02d}.csv"
-            )
-
-            fold_outputs = [
-                model_path,
-                prediction_path,
-                fold_metrics_path,
-            ]
-
-            if all(
-                path.exists()
-                for path in fold_outputs
-            ):
-                print()
-                print(
-                    f"Fold {fold_number} "
-                    f"already exists."
-                )
+            candidates.append(result)
+            runs.append(result)
+            artifacts.extend([directory / "run.json", root / result["model_path"]])
+        selected_index = max(range(len(candidates)), key=lambda i: candidates[i]["validation_macro_f1"])
+        selected = candidates[selected_index]
+        chosen = {PRIMARY_EXPERIMENT_SEED: selected}
+        selection = [{
+            "alpha": item["alpha"], "seed": item["seed"], "best_epoch": item["epoch"],
+            "validation_macro_f1": item["validation_macro_f1"], "threshold": item["threshold"],
+            "selected": index == selected_index,
+        } for index, item in enumerate(candidates)]
+        write_csv(tables / REPORTS[0], selection)
+        print(f"Selected alpha={selected['alpha']:g} using validation only.", flush=True)
+        for seed in EXPERIMENT_SEEDS:
+            if seed == PRIMARY_EXPERIMENT_SEED:
                 continue
-
-            for path in fold_outputs:
-                if path.exists():
-                    path.unlink()
-
-            print()
-            print(
-                f"Evaluating fold "
-                f"{fold_number}"
+            directory = models / f"selected_seed_{seed}"
+            result = train_candidate(
+                x_train, y_train, x_validation, y_validation, selected["alpha"],
+                seed, directory, root, fingerprint, vectorizer_path,
             )
-
-            vectorizer_path = (
-                TFIDF_MODELS_DIR
-                / f"fold_{fold_number:02d}.joblib"
-            )
-
-            vectorizer = joblib.load(
-                vectorizer_path
-            )
-
-            model = create_sgd_classifier(alpha)
-
-            train_document_count = (
-                get_document_count(
-                    connection=connection,
-                    source_path=source_path,
-                    end_date=fold["train_end"],
+            chosen[seed] = result
+            runs.append(result)
+            artifacts.extend([directory / "run.json", root / result["model_path"]])
+        del x_train, y_train
+        write_csv(tables / REPORTS[1], [row for item in runs for row in item["history"]])
+        test = load_split(connection, source, membership, "test")
+        x_test = vectorizer.transform(test["complaint_text"])
+        test = test.drop(columns="complaint_text")
+        rows = []
+        for seed in EXPERIMENT_SEEDS:
+            item = chosen[seed]
+            model = joblib.load(root / item["model_path"])
+            for split, frame, matrix in (
+                ("validation", validation, x_validation), ("test", test, x_test),
+            ):
+                score = model.predict_proba(matrix)[:, 1]
+                metrics = calculate_binary_metrics(frame["target_resolved"], score, item["threshold"])
+                rows.append({
+                    "model": "tfidf_sgd", "seed": seed, "split": split,
+                    "fingerprint": fingerprint, "alpha": selected["alpha"],
+                    "best_epoch": item["epoch"], "threshold_source": "validation_macro_f1",
+                    "complaint_count": len(frame), **metrics,
+                })
+                scored = frame.assign(
+                    score=score, prediction=(score >= item["threshold"]).astype("int8"),
+                    threshold=item["threshold"], seed=seed,
                 )
-            )
-
-            training_seconds = train_sgd(
-                connection=connection,
-                source_path=source_path,
-                train_end=fold["train_end"],
-                vectorizer=vectorizer,
-                model=model,
-                train_document_count=(
-                    train_document_count
-                ),
-            )
-
-            validation = score_split(
-                connection=connection,
-                source_path=source_path,
-                start_date=fold[
-                    "validation_start"
-                ],
-                end_date=fold[
-                    "validation_end"
-                ],
-                vectorizer=vectorizer,
-                model=model,
-            )
-
-            threshold, validation_best_macro_f1 = (
-                find_best_macro_f1_threshold(
-                    validation["target"],
-                    validation["score"],
-                )
-            )
-
-            validation_metrics = (
-                calculate_binary_metrics(
-                    validation["target"],
-                    validation["score"],
-                    threshold,
-                )
-            )
-
-            test = score_split(
-                connection=connection,
-                source_path=source_path,
-                start_date=fold[
-                    "test_start"
-                ],
-                end_date=fold[
-                    "test_end"
-                ],
-                vectorizer=vectorizer,
-                model=model,
-                collect_metadata=True,
-            )
-
-            test_metrics = (
-                calculate_binary_metrics(
-                    test["target"],
-                    test["score"],
-                    threshold,
-                )
-            )
-
-            metric_rows = [
-                {
-                    "fold": fold_number,
-                    "split": "validation",
-                    "model": "tfidf_sgd",
-                    "threshold_source": (
-                        "validation_macro_f1"
-                    ),
-                    "epochs": SGD_EPOCHS,
-                    "alpha": alpha,
-                    "training_seconds": (
-                        training_seconds
-                    ),
-                    "scoring_seconds": (
-                        validation[
-                            "scoring_seconds"
-                        ]
-                    ),
-                    **validation_metrics,
-                },
-                {
-                    "fold": fold_number,
-                    "split": "test",
-                    "model": "tfidf_sgd",
-                    "threshold_source": (
-                        "validation_macro_f1"
-                    ),
-                    "epochs": SGD_EPOCHS,
-                    "alpha": alpha,
-                    "training_seconds": (
-                        training_seconds
-                    ),
-                    "scoring_seconds": (
-                        test[
-                            "scoring_seconds"
-                        ]
-                    ),
-                    **test_metrics,
-                },
-            ]
-
-            temporary_model_path = (
-                model_path.with_suffix(
-                    ".joblib.part"
-                )
-            )
-
-            if temporary_model_path.exists():
-                temporary_model_path.unlink()
-
-            joblib.dump(
-                model,
-                temporary_model_path,
-                compress=3,
-            )
-
-            temporary_model_path.replace(
-                model_path
-            )
-
-            write_predictions(
-                connection=connection,
-                prediction_path=prediction_path,
-                result=test,
-                threshold=threshold,
-            )
-
-            write_fold_metrics(
-                fold_metrics_path=(
-                    fold_metrics_path
-                ),
-                rows=metric_rows,
-            )
-
-            print(
-                f"Threshold: "
-                f"{threshold:.6f}"
-            )
-
-            print(
-                "Validation Macro-F1: "
-                f"{validation_best_macro_f1:.4f}"
-            )
-
-            print(
-                "Test Macro-F1: "
-                f"{test_metrics['macro_f1']:.4f}"
-            )
-
-            print(
-                f"Training time: "
-                f"{training_seconds:.2f} seconds"
-            )
-
-    finally:
-        connection.close()
-
-    rebuild_aggregate_metrics()
-
-    print()
-    print("TF-IDF + SGD evaluation completed.")
-    print(
-        f"Saved to: "
-        f"{TFIDF_SGD_METRICS_PATH}"
-    )
+                path = predictions / f"seed_{seed}" / f"{split}.parquet"
+                write_predictions(connection, scored, path)
+                artifacts.append(path)
+                print(f"seed={seed} {split}: Macro-F1={metrics['macro_f1']:.4f}, ROC-AUC={metrics['roc_auc']:.4f}")
+    write_csv(tables / REPORTS[2], rows)
+    summary = []
+    frame = pd.DataFrame(rows)
+    for split, group in frame.groupby("split", sort=False):
+        for metric in ("macro_f1", "roc_auc", "pr_auc", "accuracy", "brier_score"):
+            summary.append({
+                "model": "tfidf_sgd", "split": split, "metric": metric,
+                "seed_count": len(group), "mean": float(group[metric].mean()),
+                "std": float(group[metric].std(ddof=1)),
+            })
+    write_csv(tables / REPORTS[3], summary)
+    artifacts.extend(tables / name for name in REPORTS[:-1])
+    result = {
+        "fingerprint": fingerprint, "selected_alpha": selected["alpha"],
+        "selection_seed": PRIMARY_EXPERIMENT_SEED, "seeds": list(EXPERIMENT_SEEDS),
+        "training_runs": len(runs), "tie_break": "first configured alpha; earliest epoch",
+        "vocabulary_size": len(vectorizer.vocabulary_),
+        "artifacts": artifact_hashes(artifacts, root),
+    }
+    write_json(completion, result)
+    return result

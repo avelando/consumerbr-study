@@ -5,6 +5,7 @@ from consumerbr_resolution.config import PROJECT_ROOT, TABLES_DIR
 from consumerbr_resolution.experiments.reproducibility import (
     sha256_file, validate_execution, write_json,
 )
+from consumerbr_resolution.modeling.tfidf_sgd import REPORTS, verify_artifacts
 
 
 PREPARATION_REPORTS = (
@@ -36,6 +37,13 @@ def export_reports(root=None, source=None, tables=None, destination=None):
         ):
             raise RuntimeError("Company baseline artifacts do not match this execution.")
         names.extend((completion.name, metrics.name))
+    sgd_completion = tables / "tfidf_sgd_run.json"
+    if any((tables / name).exists() for name in REPORTS):
+        if not sgd_completion.is_file():
+            raise RuntimeError("TF-IDF + SGD is incomplete.")
+        sgd = json.loads(sgd_completion.read_text(encoding="utf-8"))
+        verify_artifacts(sgd, root, manifest["fingerprint"])
+        names.extend(REPORTS)
     missing = [name for name in names if not (tables / name).is_file()]
     if missing:
         raise FileNotFoundError(f"Missing reports: {missing}")
@@ -52,7 +60,8 @@ def export_reports(root=None, source=None, tables=None, destination=None):
             temporary.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
             temporary.replace(target)
     write_json(destination / "report_manifest.json", {
-        "stage": "company_baseline" if completion.exists() else "data_preparation_and_temporal_audit",
+        "stage": ("tfidf_sgd" if sgd_completion.exists() else
+                  "company_baseline" if completion.exists() else "data_preparation_and_temporal_audit"),
         "fingerprint": manifest["fingerprint"],
         "files": {name: sha256_file(destination / name) for name in names},
     })
