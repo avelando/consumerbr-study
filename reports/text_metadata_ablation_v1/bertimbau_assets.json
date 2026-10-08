@@ -1,0 +1,14 @@
+{
+  "fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
+  "model": "neuralmind/bert-base-portuguese-cased",
+  "revision": "74364c8dbc30e651fee36aa714a772dcaae83815",
+  "weight_file": "pytorch_model.bin",
+  "artifacts": {
+    "data/interim/bertimbau/pretrained/config.json": "5d8e34a2272a548e9c346133253ac20453b0d1ad8d3190d6ba89252c7c544357",
+    "data/interim/bertimbau/pretrained/vocab.txt": "69c28584c67a0e5018f85ca734aa272cc38e26b5dd0d33fffa28059299f21707",
+    "data/interim/bertimbau/pretrained/tokenizer_config.json": "5abeb5276424d64097abc25b16c149da7c0fdf0594253c34fd899321db4913ea",
+    "data/interim/bertimbau/pretrained/special_tokens_map.json": "303df45a03609e4ead04bc3dc1536d0ab19b5358db685b6f3da123d05ec200e3",
+    "data/interim/bertimbau/pretrained/added_tokens.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+    "data/interim/bertimbau/pretrained/pytorch_model.bin": "cb1693767adef60abf23d9fde3996f0c1e6310afad103a2db94ad44854568955"
+  }
+}
