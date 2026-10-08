@@ -33,7 +33,7 @@ class BertimbauPreparationTests(unittest.TestCase):
         self.addCleanup(fixture.doCleanups)
         self.fixture = fixture
         self.root, self.source, self.tables = fixture.root, fixture.source, fixture.tables
-        fixture.rows[0] = (*fixture.rows[0][:4], "word " * 300, fixture.rows[0][5])
+        fixture.rows[0] = (*fixture.rows[0][:4], "word " * 600, fixture.rows[0][5])
         fixture.save_source()
         (self.tables / "execution_manifest.json").unlink()
         self.manifest = register_execution(self.root, self.source, self.tables)
@@ -63,8 +63,8 @@ class BertimbauPreparationTests(unittest.TestCase):
         self.assertEqual({row["record_id"] for row in rows}, {"0", "1", "4", "5", "8", "9"})
         self.assertEqual({row["split"] for row in rows}, {"train", "validation", "test"})
         long = next(row for row in rows if row["record_id"] == "0")
-        self.assertEqual(long["original_token_count"], 302)
-        self.assertEqual(len(long["input_ids"]), 256)
+        self.assertEqual(long["original_token_count"], 602)
+        self.assertEqual(len(long["input_ids"]), 512)
         self.assertEqual((long["input_ids"][0], long["input_ids"][-1]), (101, 102))
         self.assertEqual(len(list(path.parent.glob("*.parquet"))), 1)
 

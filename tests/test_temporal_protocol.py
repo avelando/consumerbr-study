@@ -94,6 +94,7 @@ class TemporalProtocolTests(unittest.TestCase):
             (self.destination / "experimental_protocol.json").read_text()
         )
         self.assertEqual(protocol["seeds"], [42, 13, 101])
+        self.assertEqual(protocol["bertimbau_max_length"], 512)
         self.assertTrue(protocol["prior_test_inspection"])
 
     def test_duplicate_record_ids_are_rejected(self):

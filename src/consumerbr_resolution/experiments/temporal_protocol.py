@@ -7,6 +7,7 @@ import duckdb
 from consumerbr_resolution.config import (
     BERTIMBAU_EPOCHS,
     BERTIMBAU_LEARNING_RATE_CANDIDATES,
+    BERTIMBAU_MAX_LENGTH,
     BOOTSTRAP_REPLICATES,
     COMPANY_HISTORY_SMOOTHING,
     EXPECTED_CORPUS_OBSERVATION_END,
@@ -164,6 +165,7 @@ def build_temporal_protocol(source_path=None, output_dir=None):
         "sgd_max_epochs": SGD_EPOCHS,
         "bertimbau_learning_rate_candidates": BERTIMBAU_LEARNING_RATE_CANDIDATES,
         "bertimbau_max_epochs": BERTIMBAU_EPOCHS,
+        "bertimbau_max_length": BERTIMBAU_MAX_LENGTH,
         "company_history_smoothing": COMPANY_HISTORY_SMOOTHING,
         "bootstrap_replicates": BOOTSTRAP_REPLICATES,
         "prior_test_inspection": True,

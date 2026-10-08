@@ -121,8 +121,16 @@ class StageIdentityTests(unittest.TestCase):
         self.assertIn("bertimbau_text", current["stages"])
 
     def test_bert_length_change_does_not_invalidate_classical_stages(self):
-        with patch.object(config, "BERTIMBAU_MAX_LENGTH", 512):
+        self.complete()
+        before = self.baseline_bytes()
+        model = self.models / "classical/tfidf_sgd/candidate_00_seed_42/model.joblib"
+        model_hash = sha256_file(model)
+        sgd_report = (self.tables / "tfidf_sgd_run.json").read_bytes()
+        with patch.object(config, "BERTIMBAU_MAX_LENGTH", 256):
             current = register_execution(self.root, self.source, self.tables)
+        self.assertEqual(before, self.baseline_bytes())
+        self.assertEqual(model_hash, sha256_file(model))
+        self.assertEqual(sgd_report, (self.tables / "tfidf_sgd_run.json").read_bytes())
         for stage in ("company_baseline", "tfidf_sgd", "bertimbau_assets"):
             self.assertEqual(self.manifest["stages"][stage], current["stages"][stage])
         for stage in ("bertimbau_preflight", "bertimbau_tokens"):
