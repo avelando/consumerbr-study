@@ -82,7 +82,7 @@ STAGES = [
 
 def execute_stage(stage_number, stage):
     print()
-    print(f"Running stage {stage_number}: {stage.name}")
+    print(f"Running stage {stage_number:02d}: {stage.name}")
     print()
 
     module = import_module(
@@ -109,7 +109,7 @@ def run_stage_by_command(command):
 
 
 def run_all():
-    raise RuntimeError(
-        "The reduced experimental protocol is not complete. "
-        "Run preparation stages individually."
-    )
+    print(f"Running {len(STAGES)} implemented stages in sequence.")
+    for stage_number, stage in enumerate(STAGES, start=1):
+        execute_stage(stage_number, stage)
+    print("Implemented stages completed. TF-IDF and transformer experiments are pending.")
