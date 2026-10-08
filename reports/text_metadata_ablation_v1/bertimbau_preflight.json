@@ -8,7 +8,7 @@
   "cuda_runtime": "13.0",
   "gpu": "NVIDIA GeForce RTX 3090",
   "precision": "bf16",
-  "cuda_visible_devices": "0",
+  "cuda_visible_devices": "unset",
   "max_length": 256,
   "train_batch_size": 8,
   "eval_batch_size": 32,
@@ -19,5 +19,5 @@
   "total_gib": 23.55828857421875,
   "peak_allocated_gib": 2.084146022796631,
   "peak_reserved_gib": 2.21484375,
-  "synthetic_seconds": 2.0106264939531684
+  "synthetic_seconds": 0.8297465250361711
 }

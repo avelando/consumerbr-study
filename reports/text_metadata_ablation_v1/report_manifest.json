@@ -1,6 +1,6 @@
 {
   "stage": "bertimbau_preparation",
-  "fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
+  "fingerprint": "03e12fb28dcd49db3c553ce02d2633da6d7582a51d8f3e1d3dcfaf86f4de18dd",
   "files": {
     "dataset_integrity_audit.csv": "c5ffbc52e95ebc10d5cc3b8a9bfd628c21cbc661540817249a36ab9acf22891b",
     "temporal_protocol_audit.csv": "28c6f0d8d5f3b504015ff73de2b3272d1755700c5071eda1e77e82eb011c31c6",
@@ -16,7 +16,7 @@
     "outcome_observation_monthly.csv": "05dbb177247423bb6bef89ad3a8df647b98709fe9742c3dc6ed0ad2ac23951a1",
     "outcome_observation_text.csv": "3f61aa15cc271da1166e10236b82d695dda4086b6451dfa157169a915432801c",
     "experimental_protocol.json": "eabcb1e96393837a9e7060b59a358fbc25b3984543a3a7a883cf1ab672b34dd2",
-    "execution_manifest.json": "8995dfc4dbffbd05073cd46764ed82200a6e02db735efaf57875cecb41dacd52",
+    "execution_manifest.json": "45963848b627199230dacd4d4c07ccd9402ce14b19d0b14080083f703480d4f6",
     "company_baseline_run.json": "6ee6d9a599aab2340eb29e5fb2185b4d70ce04937beed8e2cbaa94cf3f5803b6",
     "company_baseline_metrics.csv": "a33769aa20ba2c4828a2e4dd26cc04219b2d211edd9b2edde5b9d72b6e78f472",
     "tfidf_sgd_selection.csv": "b994a0f47569ddf082fab084998813bcb05790a2e036e9ae88db7a88ffea4e7d",
@@ -25,7 +25,7 @@
     "tfidf_sgd_summary.csv": "2bb9249ea2ff4857b6145a867984f08e2241332aa5628a2d95406897037be93f",
     "tfidf_sgd_run.json": "aa5bdb0511390ef25e2a6e82cfc9b113c36a2b6113cb7a518e2b20a40b8acf51",
     "bertimbau_assets.json": "bf993741b1a128a388261ccd6193913abcb248d49370efecc13c3277107be246",
-    "bertimbau_preflight.json": "ea9bcd386100c142fa16cd677b71f2f1963074960bdf3a9a2d343708302687d1",
+    "bertimbau_preflight.json": "4c64f68545d825cc18802525c90e288c90afdfc7bd0ff1144123f7dadfd68dec",
     "bertimbau_token_summary.csv": "fd4d57259f346403c82d42fd3ae28c1795fc44c95de98393eab7bcd079dd7e63",
     "bertimbau_tokens_run.json": "4038fb2b618f261aeab1b36e39df5cc520bf6086f02d16c15e0ae72c25b919c1"
   }
