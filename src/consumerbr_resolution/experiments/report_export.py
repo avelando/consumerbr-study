@@ -8,6 +8,12 @@ from consumerbr_resolution.experiments.reproducibility import (
 from consumerbr_resolution.modeling.tfidf_sgd import REPORTS, verify_artifacts
 
 
+BERTIMBAU_REPORTS = (
+    "bertimbau_selection.csv", "bertimbau_training_history.csv",
+    "bertimbau_metrics.csv", "bertimbau_summary.csv", "bertimbau_run.json",
+)
+
+
 PREPARATION_REPORTS = (
     "dataset_integrity_audit.csv", "temporal_protocol_audit.csv",
     "temporal_split_summary.csv", "temporal_text_overlap.csv",
@@ -69,6 +75,16 @@ def export_reports(root=None, source=None, tables=None, destination=None):
         if sha256_file(summary) != sha256_file(cached_summary):
             raise RuntimeError("BERTimbau token summary changed.")
         names.extend(transformer_names)
+    bertimbau_completion = tables / BERTIMBAU_REPORTS[-1]
+    if any((tables / name).exists() for name in BERTIMBAU_REPORTS):
+        if not all((tables / name).is_file() for name in BERTIMBAU_REPORTS):
+            raise RuntimeError("BERTimbau fine-tuning is incomplete.")
+        from consumerbr_resolution.modeling.bertimbau_finetuning import verify_run
+
+        record = json.loads(bertimbau_completion.read_text(encoding="utf-8"))
+        registered = validate_execution(root, source, tables, stage="bertimbau")
+        verify_run(record, root, registered["fingerprint"])
+        names.extend(BERTIMBAU_REPORTS)
     missing = [name for name in names if not (tables / name).is_file()]
     if missing:
         raise FileNotFoundError(f"Missing reports: {missing}")
@@ -85,7 +101,8 @@ def export_reports(root=None, source=None, tables=None, destination=None):
             temporary.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
             temporary.replace(target)
     write_json(destination / "report_manifest.json", {
-        "stage": ("bertimbau_preparation" if transformer_started else
+        "stage": ("bertimbau" if bertimbau_completion.exists() else
+                  "bertimbau_preparation" if transformer_started else
                   "tfidf_sgd" if sgd_completion.exists() else
                   "company_baseline" if completion.exists() else "data_preparation_and_temporal_audit"),
         "fingerprint": manifest["fingerprint"],

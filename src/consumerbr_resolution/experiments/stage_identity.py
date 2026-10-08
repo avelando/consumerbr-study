@@ -64,6 +64,27 @@ STAGES = {
         "upstream": ("bertimbau_assets",),
         "reports": ("bertimbau_token_summary.csv", "bertimbau_tokens_run.json"),
     },
+    "bertimbau": {
+        "files": ("modeling/bertimbau_finetuning.py", "modeling/bertimbau_assets.py",
+                  "evaluation/metrics.py", "baselines.py#write_predictions",
+                  "experiments/temporal_protocol.py#write_csv"),
+        "config": ("EXPERIMENT_SEEDS", "PRIMARY_EXPERIMENT_SEED",
+                   "BERTIMBAU_LEARNING_RATE_CANDIDATES", "BERTIMBAU_EPOCHS",
+                   "BERTIMBAU_MAX_LENGTH", "BERTIMBAU_TOKEN_CACHE_PATH",
+                   "BERTIMBAU_FINETUNED_DIR", "BERTIMBAU_TRAIN_BATCH_SIZE",
+                   "BERTIMBAU_EVAL_BATCH_SIZE", "BERTIMBAU_GRADIENT_ACCUMULATION_STEPS",
+                   "BERTIMBAU_GRADIENT_CHECKPOINTING", "BERTIMBAU_USE_AMP",
+                   "BERTIMBAU_WEIGHT_DECAY", "BERTIMBAU_WARMUP_RATIO",
+                   "BERTIMBAU_MAX_GRAD_NORM"),
+        "protocol": ("seeds", "selection_seed", "bertimbau_learning_rate_candidates",
+                     "bertimbau_max_epochs", "bertimbau_max_length"),
+        "packages": ("duckdb", "numpy", "pandas", "pyarrow", "scikit-learn",
+                     "torch", "transformers", "tokenizers", "safetensors", "tqdm"),
+        "upstream": ("bertimbau_assets", "bertimbau_preflight", "bertimbau_tokens"),
+        "reports": ("bertimbau_selection.csv", "bertimbau_training_history.csv",
+                    "bertimbau_metrics.csv", "bertimbau_summary.csv", "bertimbau_run.json"),
+        "predictions": "bertimbau", "models": "transformers/bertimbau_base/finetuned",
+    },
 }
 
 
@@ -171,7 +192,7 @@ def verify_stage_artifacts(root, tables, models, stage, fingerprint):
     spec = STAGES[stage]
     records = [Path(tables) / name for name in spec["reports"] if name.endswith(".json")]
     if spec.get("models"):
-        records.extend((Path(models) / spec["models"]).rglob("*.json"))
+        records.extend((Path(models) / spec["models"]).rglob("*run.json"))
     for path in records:
         if not path.exists():
             continue
