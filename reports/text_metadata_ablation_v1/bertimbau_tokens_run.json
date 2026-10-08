@@ -1,6 +1,6 @@
 {
-  "fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
-  "token_fingerprint": "f9a014d39f462022cd4f721ce8fed0cc3da2d4505c9c12f179f1b90f6f6787b8",
+  "fingerprint": "054f3a6b07e8ac40704494556fea0185c3b83cab1363b11fe993890bbadb6c66",
+  "token_fingerprint": "5f3da65fd70a1dbe6cced276e37a476e303c440159e13ad09df761af8072c077",
   "identity": {
     "source": "c762285a355ab73cfa23922c679bbc296e6a6a5c1230f80de32cc338ad9eecf4",
     "membership": "07bf8e6bf572be1d20b2b09e68c9cbe1c4ae704b00477d586d50833a7f6796dc",
@@ -12,7 +12,7 @@
       "data/interim/bertimbau/pretrained/added_tokens.json": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
       "data/interim/bertimbau/pretrained/pytorch_model.bin": "cb1693767adef60abf23d9fde3996f0c1e6310afad103a2db94ad44854568955"
     },
-    "max_length": 256,
+    "max_length": 512,
     "strategy": "head",
     "tokenizer_packages": {
       "transformers": "5.19.0",
@@ -22,8 +22,8 @@
     "encoding": "8b40c20b17bb100f454e9a3eb7b22595bdcb0206d67fa7cbb465223851ec4f3a"
   },
   "artifacts": {
-    "data/interim/tokenized/bertimbau_base_tokens.parquet": "9d54ae249d36e89f22994beb2d4ce22ae805cb2c74bacffe638f534097b69066",
-    "data/interim/tokenized/bertimbau_base_tokens.summary.csv": "fd4d57259f346403c82d42fd3ae28c1795fc44c95de98393eab7bcd079dd7e63",
-    "data/interim/tokenized/bertimbau_base_tokens.run.json": "202782a7e31a7b90ba835758bb3ae263ec6aee23a9fc0f64e506de2834048c91"
+    "data/interim/tokenized/bertimbau_base_tokens.parquet": "dd5f7bb4745ae1cf25d4db3e704593ae301f04f021dac1ab545e15e9fa95f9e5",
+    "data/interim/tokenized/bertimbau_base_tokens.summary.csv": "dcf97f2e989464b12fbc98151bf352258118c9dadafa7b7a845c8102dec32337",
+    "data/interim/tokenized/bertimbau_base_tokens.run.json": "b1c94f8bd8795fd983a676099fea9fda4a9078904a118e7045bd5870e1f48e1e"
   }
 }

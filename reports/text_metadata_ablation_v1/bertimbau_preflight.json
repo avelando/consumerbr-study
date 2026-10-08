@@ -1,5 +1,5 @@
 {
-  "fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
+  "fingerprint": "ee493be9802430c6735b917f507212b0e2c493c6640e4118814f647d1957e5be",
   "passed": true,
   "synthetic_inputs": true,
   "model": "neuralmind/bert-base-portuguese-cased",
@@ -9,15 +9,15 @@
   "gpu": "NVIDIA GeForce RTX 3090",
   "precision": "bf16",
   "cuda_visible_devices": "unset",
-  "max_length": 256,
-  "train_batch_size": 8,
-  "eval_batch_size": 32,
-  "accumulation_steps": 4,
+  "max_length": 512,
+  "train_batch_size": 4,
+  "eval_batch_size": 16,
+  "accumulation_steps": 8,
   "effective_batch_size": 32,
   "gradient_checkpointing": true,
   "initial_free_gib": 23.264892578125,
   "total_gib": 23.55828857421875,
-  "peak_allocated_gib": 2.084146022796631,
+  "peak_allocated_gib": 2.085366725921631,
   "peak_reserved_gib": 2.21484375,
-  "synthetic_seconds": 0.8297465250361711
+  "synthetic_seconds": 1.1643081039655954
 }

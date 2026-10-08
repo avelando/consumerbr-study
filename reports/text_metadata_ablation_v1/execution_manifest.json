@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "fingerprint": "03e12fb28dcd49db3c553ce02d2633da6d7582a51d8f3e1d3dcfaf86f4de18dd",
+  "fingerprint": "966cae04cb87eb6da41888394dcfd251498e8dccc982b682ab052fa707dcc76a",
   "identity": {
     "source_sha256": "c762285a355ab73cfa23922c679bbc296e6a6a5c1230f80de32cc338ad9eecf4",
     "membership_sha256": "07bf8e6bf572be1d20b2b09e68c9cbe1c4ae704b00477d586d50833a7f6796dc",
@@ -71,6 +71,7 @@
         2e-05
       ],
       "bertimbau_max_epochs": 3,
+      "bertimbau_max_length": 512,
       "company_history_smoothing": 100.0,
       "bootstrap_replicates": 2000,
       "prior_test_inspection": true,
@@ -84,7 +85,7 @@
       "src/consumerbr_resolution/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/baselines.py": "8f2913763d467f5e774b3b4f1f888e309e0150c7fe1d356cbe26de86f66d2844",
       "src/consumerbr_resolution/cli.py": "d55b3799e3626460811091f7d39acb82af0127da59951db521b14c80eda9c28f",
-      "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+      "src/consumerbr_resolution/config.py": "14a2ca028621a655ff2f123cd9d5cfed8557dc1c8f56fc5ce9a804389c8a81dd",
       "src/consumerbr_resolution/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/data/characterize.py": "65ee8429750ebb496e5b6778e1e803345c2ecc3a657a1b8e19b34360418fa11a",
       "src/consumerbr_resolution/data/clean.py": "debe2735c5185bcd8218df434245dbfe923cf09af7335f3becdaaf37f2eea137",
@@ -107,7 +108,7 @@
       "src/consumerbr_resolution/experiments/stage_identity.py": "8e91d5d353a71ca292d35e7509ed461072dae780b98545b15b7167de9c94a38f",
       "src/consumerbr_resolution/experiments/stage_migration.json": "8f4501260fc027a2c1ef4447f163fa63bddfe11faf745204ed995c3a937e8622",
       "src/consumerbr_resolution/experiments/temporal_design.py": "b1f1e84877a8c3f40c8ab8c706ed2489ca95cdc69ceca9e2a1d4a338b766cb19",
-      "src/consumerbr_resolution/experiments/temporal_protocol.py": "2e142800231eca31002d46160f047b1fe5f352862b4682923c5eca5dcd90ce88",
+      "src/consumerbr_resolution/experiments/temporal_protocol.py": "61022c4f30ddd19b861902996274ef71a69d6fcd6f75fcd695226e5ab230c539",
       "src/consumerbr_resolution/modeling/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/modeling/bertimbau_assets.py": "a0169e8ce9a42b4b70a552c242ed97a553df6cf1e1326531fdc3bbb27817a83c",
       "src/consumerbr_resolution/modeling/bertimbau_finetuning.py": "6a094c699e8f687432d5f9c220b3bd40f7b4886f62352049e069f8cf8de14c06",
@@ -119,11 +120,11 @@
       "src/consumerbr_resolution/modeling/tfidf_sgd.py": "4bc5648012bfadea481885e1e808dac0ec033a60cc62e4db075bbcabcb38414c",
       "src/consumerbr_resolution/modeling/transformer_tokenization.py": "8b40c20b17bb100f454e9a3eb7b22595bdcb0206d67fa7cbb465223851ec4f3a",
       "src/consumerbr_resolution/pipeline.py": "0eadec5447e33b8d369a1f1cccbf27c82353125313eb573c5150312156a17862",
-      "tests/test_bertimbau_preparation.py": "a4fc18f9dbda4c8365ba294bc823ff2d39252f80cf7f951f9c7d8ac59ade4a66",
+      "tests/test_bertimbau_preparation.py": "50c494b125fdffb7250a1636d6010d410fd7aa20913fb9cdedb622803fbdaf91",
       "tests/test_company_baseline.py": "7fb82ed85ea532437079c679ead0b3f61be53cf1799fbaec0631f9ae2e79ce21",
       "tests/test_pipeline.py": "83ed021c049d0927be09acde6897bdeb22fcca16106c819c3054c18165ebf202",
-      "tests/test_stage_identity.py": "27cc336fff1dd6315820edf81bf7449adef9b598fb3545716b7783b21124cb06",
-      "tests/test_temporal_protocol.py": "2ab332194eb0aed8674743141fd9750f440714381b68ce5d154c6ea07d68c6ac",
+      "tests/test_stage_identity.py": "0fae07ef4c72ef75499de239eb62b708cad86316b59dd62b1644085374eb8cb8",
+      "tests/test_temporal_protocol.py": "c2854e3ec6c0a0bab7824db1e94d221afce28c1b3817065a85926e329daea990",
       "tests/test_tfidf_sgd.py": "8a404621375790bf3308c5aadb211f19c47c1f7c9df11a86317d5d1073c41908",
       "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4"
     },
@@ -148,11 +149,11 @@
     "transformer": {
       "name": "neuralmind/bert-base-portuguese-cased",
       "revision": "74364c8dbc30e651fee36aa714a772dcaae83815",
-      "max_length": 256
+      "max_length": 512
     }
   },
   "git": {
-    "commit": "9ba1024eb95e2e41231f3d7637f5508c49b72f25",
+    "commit": "294ebb1579c82871764106bd74986a8341c41112",
     "branch": "experiment/text-metadata-ablation",
     "tags": [],
     "status": "",
@@ -164,7 +165,7 @@
       "src/consumerbr_resolution/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/baselines.py": "8f2913763d467f5e774b3b4f1f888e309e0150c7fe1d356cbe26de86f66d2844",
       "src/consumerbr_resolution/cli.py": "d55b3799e3626460811091f7d39acb82af0127da59951db521b14c80eda9c28f",
-      "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+      "src/consumerbr_resolution/config.py": "14a2ca028621a655ff2f123cd9d5cfed8557dc1c8f56fc5ce9a804389c8a81dd",
       "src/consumerbr_resolution/data/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/data/characterize.py": "65ee8429750ebb496e5b6778e1e803345c2ecc3a657a1b8e19b34360418fa11a",
       "src/consumerbr_resolution/data/clean.py": "debe2735c5185bcd8218df434245dbfe923cf09af7335f3becdaaf37f2eea137",
@@ -187,7 +188,7 @@
       "src/consumerbr_resolution/experiments/stage_identity.py": "8e91d5d353a71ca292d35e7509ed461072dae780b98545b15b7167de9c94a38f",
       "src/consumerbr_resolution/experiments/stage_migration.json": "8f4501260fc027a2c1ef4447f163fa63bddfe11faf745204ed995c3a937e8622",
       "src/consumerbr_resolution/experiments/temporal_design.py": "b1f1e84877a8c3f40c8ab8c706ed2489ca95cdc69ceca9e2a1d4a338b766cb19",
-      "src/consumerbr_resolution/experiments/temporal_protocol.py": "2e142800231eca31002d46160f047b1fe5f352862b4682923c5eca5dcd90ce88",
+      "src/consumerbr_resolution/experiments/temporal_protocol.py": "61022c4f30ddd19b861902996274ef71a69d6fcd6f75fcd695226e5ab230c539",
       "src/consumerbr_resolution/modeling/__init__.py": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
       "src/consumerbr_resolution/modeling/bertimbau_assets.py": "a0169e8ce9a42b4b70a552c242ed97a553df6cf1e1326531fdc3bbb27817a83c",
       "src/consumerbr_resolution/modeling/bertimbau_finetuning.py": "6a094c699e8f687432d5f9c220b3bd40f7b4886f62352049e069f8cf8de14c06",
@@ -199,11 +200,11 @@
       "src/consumerbr_resolution/modeling/tfidf_sgd.py": "4bc5648012bfadea481885e1e808dac0ec033a60cc62e4db075bbcabcb38414c",
       "src/consumerbr_resolution/modeling/transformer_tokenization.py": "8b40c20b17bb100f454e9a3eb7b22595bdcb0206d67fa7cbb465223851ec4f3a",
       "src/consumerbr_resolution/pipeline.py": "0eadec5447e33b8d369a1f1cccbf27c82353125313eb573c5150312156a17862",
-      "tests/test_bertimbau_preparation.py": "a4fc18f9dbda4c8365ba294bc823ff2d39252f80cf7f951f9c7d8ac59ade4a66",
+      "tests/test_bertimbau_preparation.py": "50c494b125fdffb7250a1636d6010d410fd7aa20913fb9cdedb622803fbdaf91",
       "tests/test_company_baseline.py": "7fb82ed85ea532437079c679ead0b3f61be53cf1799fbaec0631f9ae2e79ce21",
       "tests/test_pipeline.py": "83ed021c049d0927be09acde6897bdeb22fcca16106c819c3054c18165ebf202",
-      "tests/test_stage_identity.py": "27cc336fff1dd6315820edf81bf7449adef9b598fb3545716b7783b21124cb06",
-      "tests/test_temporal_protocol.py": "2ab332194eb0aed8674743141fd9750f440714381b68ce5d154c6ea07d68c6ac",
+      "tests/test_stage_identity.py": "0fae07ef4c72ef75499de239eb62b708cad86316b59dd62b1644085374eb8cb8",
+      "tests/test_temporal_protocol.py": "c2854e3ec6c0a0bab7824db1e94d221afce28c1b3817065a85926e329daea990",
       "tests/test_tfidf_sgd.py": "8a404621375790bf3308c5aadb211f19c47c1f7c9df11a86317d5d1073c41908",
       "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4"
     }
@@ -597,13 +598,13 @@
           "BERTIMBAU_MODEL_NAME": "neuralmind/bert-base-portuguese-cased",
           "BERTIMBAU_REVISION": "74364c8dbc30e651fee36aa714a772dcaae83815",
           "BERTIMBAU_PRETRAINED_DIR": "data/interim/bertimbau/pretrained",
-          "BERTIMBAU_EVAL_BATCH_SIZE": 32,
-          "BERTIMBAU_GRADIENT_ACCUMULATION_STEPS": 4,
+          "BERTIMBAU_EVAL_BATCH_SIZE": 16,
+          "BERTIMBAU_GRADIENT_ACCUMULATION_STEPS": 8,
           "BERTIMBAU_GRADIENT_CHECKPOINTING": true,
           "BERTIMBAU_LEARNING_RATE": 2e-05,
           "BERTIMBAU_MAX_GRAD_NORM": 1.0,
-          "BERTIMBAU_MAX_LENGTH": 256,
-          "BERTIMBAU_TRAIN_BATCH_SIZE": 8,
+          "BERTIMBAU_MAX_LENGTH": 512,
+          "BERTIMBAU_TRAIN_BATCH_SIZE": 4,
           "BERTIMBAU_USE_AMP": true,
           "BERTIMBAU_WEIGHT_DECAY": 0.01,
           "PRIMARY_EXPERIMENT_SEED": 42
@@ -619,9 +620,9 @@
           "bertimbau_assets": "41465da88407372d0de0cc638255416bfe147b94b535a0f3742ee7fd042d58b6"
         }
       },
-      "dependency_fingerprint": "c54440ad2a855b837dd637755181f20c0c55f74814238de06d4a9ed656f7f36f",
-      "artifact_fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
-      "origin_execution_fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7"
+      "dependency_fingerprint": "ee493be9802430c6735b917f507212b0e2c493c6640e4118814f647d1957e5be",
+      "artifact_fingerprint": "ee493be9802430c6735b917f507212b0e2c493c6640e4118814f647d1957e5be",
+      "origin_execution_fingerprint": "966cae04cb87eb6da41888394dcfd251498e8dccc982b682ab052fa707dcc76a"
     },
     "bertimbau_tokens": {
       "identity": {
@@ -725,7 +726,7 @@
           "BERTIMBAU_MODEL_NAME": "neuralmind/bert-base-portuguese-cased",
           "BERTIMBAU_REVISION": "74364c8dbc30e651fee36aa714a772dcaae83815",
           "BERTIMBAU_PRETRAINED_DIR": "data/interim/bertimbau/pretrained",
-          "BERTIMBAU_MAX_LENGTH": 256,
+          "BERTIMBAU_MAX_LENGTH": 512,
           "BERTIMBAU_TOKENIZATION_BATCH_SIZE": 2048,
           "BERTIMBAU_TOKEN_CACHE_PATH": "data/interim/tokenized/bertimbau_base_tokens.parquet"
         },
@@ -742,9 +743,9 @@
           "bertimbau_assets": "41465da88407372d0de0cc638255416bfe147b94b535a0f3742ee7fd042d58b6"
         }
       },
-      "dependency_fingerprint": "48cc01f636d0fab99dcac5750a7942090b8ab822ad6a90b60e7eca0b03002bab",
-      "artifact_fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7",
-      "origin_execution_fingerprint": "4425df01f13a144b2ec76835e5864ceaf71d37a855836cd9c6a19204259ddff7"
+      "dependency_fingerprint": "054f3a6b07e8ac40704494556fea0185c3b83cab1363b11fe993890bbadb6c66",
+      "artifact_fingerprint": "054f3a6b07e8ac40704494556fea0185c3b83cab1363b11fe993890bbadb6c66",
+      "origin_execution_fingerprint": "966cae04cb87eb6da41888394dcfd251498e8dccc982b682ab052fa707dcc76a"
     }
   }
 }

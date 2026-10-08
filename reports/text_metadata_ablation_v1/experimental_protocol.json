@@ -68,6 +68,7 @@
     2e-05
   ],
   "bertimbau_max_epochs": 3,
+  "bertimbau_max_length": 512,
   "company_history_smoothing": 100.0,
   "bootstrap_replicates": 2000,
   "prior_test_inspection": true,
