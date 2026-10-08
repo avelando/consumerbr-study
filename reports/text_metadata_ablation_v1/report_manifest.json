@@ -1,5 +1,6 @@
 {
-  "stage": "data_preparation_and_temporal_audit",
+  "stage": "company_baseline",
+  "fingerprint": "c6343983694fa155759ab160c3e71c3cce87c20601d5026124f62496f86637a6",
   "files": {
     "dataset_integrity_audit.csv": "c5ffbc52e95ebc10d5cc3b8a9bfd628c21cbc661540817249a36ab9acf22891b",
     "temporal_protocol_audit.csv": "28c6f0d8d5f3b504015ff73de2b3272d1755700c5071eda1e77e82eb011c31c6",
@@ -14,6 +15,9 @@
     "outcome_observation_summary.csv": "1daed7c3faf9bd39d28123eae2223dedaec2c49be0bd813f0352ed4cf443a614",
     "outcome_observation_monthly.csv": "05dbb177247423bb6bef89ad3a8df647b98709fe9742c3dc6ed0ad2ac23951a1",
     "outcome_observation_text.csv": "3f61aa15cc271da1166e10236b82d695dda4086b6451dfa157169a915432801c",
-    "experimental_protocol.json": "904c3136b313603112fb7f3fa78acafbdc33428922744cf7894a3366a20da1a8"
+    "experimental_protocol.json": "eabcb1e96393837a9e7060b59a358fbc25b3984543a3a7a883cf1ab672b34dd2",
+    "execution_manifest.json": "700719a9f7082da2c2f2d303651a11bede8d7f2d48661aac7734cf7106dd4e2f",
+    "company_baseline_run.json": "86c328209022435b620d66710af2632ce45cf9963a6bea172de17a49b5e30cd8",
+    "company_baseline_metrics.csv": "eddfbda894e756b7012039a7c4d1281fd478294de2654b726d52f78da0262153"
   }
 }

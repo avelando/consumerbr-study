@@ -1,8 +1,8 @@
 {
   "experiment_id": "text_metadata_ablation_v1",
   "source_path": "data/processed/consumerbr_feature_base.parquet",
-  "source_size_bytes": 440780544,
-  "source_mtime_ns": 1791431776020329790,
+  "source_size_bytes": 440779459,
+  "source_mtime_ns": 1791439095913454526,
   "observation_end": "2025-04-03",
   "windows": [
     {

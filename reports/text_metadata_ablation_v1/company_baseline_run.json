@@ -1,0 +1,9 @@
+{
+  "fingerprint": "c6343983694fa155759ab160c3e71c3cce87c20601d5026124f62496f86637a6",
+  "threshold": 0.5387474414962314,
+  "artifacts": {
+    "predictions/company_historical_rate/validation.parquet": "34650ce0b6b46656b7648f8793cec58e94b02255cce5cba0270771ba9eb821b1",
+    "predictions/company_historical_rate/test.parquet": "087702ca77ff385708f3bfc0b74bf7b10446917faabaaed7637d7a940ff8ff79",
+    "tables/company_baseline_metrics.csv": "eddfbda894e756b7012039a7c4d1281fd478294de2654b726d52f78da0262153"
+  }
+}
