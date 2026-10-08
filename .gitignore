@@ -10,3 +10,6 @@ results/
 logs/
 
 .vscode/
+
+.venv-server/
+.cache/
