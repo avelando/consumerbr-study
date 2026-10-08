@@ -74,10 +74,7 @@ BERTIMBAU_MODELS_DIR = (
     / "bertimbau_base"
 )
 
-BERTIMBAU_PRETRAINED_DIR = (
-    BERTIMBAU_MODELS_DIR
-    / "pretrained"
-)
+BERTIMBAU_PRETRAINED_DIR = INTERIM_DATA_DIR / "bertimbau" / "pretrained"
 
 BERTIMBAU_FINETUNED_DIR = (
     BERTIMBAU_MODELS_DIR

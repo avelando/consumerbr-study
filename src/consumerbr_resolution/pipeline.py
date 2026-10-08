@@ -77,6 +77,12 @@ STAGES = [
           "baselines", "evaluate_historical_baselines"),
     Stage("tfidf-sgd", "Select and evaluate word TF-IDF + SGD",
           "modeling.tfidf_sgd", "evaluate_tfidf_sgd"),
+    Stage("bertimbau-assets", "Prepare pinned BERTimbau assets",
+          "modeling.bertimbau_assets", "prepare_bertimbau_assets"),
+    Stage("bertimbau-preflight", "Check BERTimbau training memory and precision on CUDA",
+          "modeling.bertimbau_preflight", "check_bertimbau_gpu"),
+    Stage("bertimbau-tokens", "Build and audit a single BERTimbau token cache",
+          "modeling.bertimbau_tokens", "build_bertimbau_token_cache"),
     Stage("export-reports", "Export aggregate reports for publication",
           "experiments.report_export", "export_reports"),
 ]
@@ -114,4 +120,4 @@ def run_all():
     print(f"Running {len(STAGES)} implemented stages in sequence.")
     for stage_number, stage in enumerate(STAGES, start=1):
         execute_stage(stage_number, stage)
-    print("Implemented stages completed. Transformer experiments and comparative analyses are pending.")
+    print("Implemented stages completed. Transformer preparation completed. Fine-tuning and comparative analyses are pending.")

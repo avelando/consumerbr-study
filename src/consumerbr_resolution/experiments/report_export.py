@@ -44,6 +44,29 @@ def export_reports(root=None, source=None, tables=None, destination=None):
         sgd = json.loads(sgd_completion.read_text(encoding="utf-8"))
         verify_artifacts(sgd, root, manifest["fingerprint"])
         names.extend(REPORTS)
+    transformer_names = (
+        "bertimbau_assets.json", "bertimbau_preflight.json",
+        "bertimbau_token_summary.csv", "bertimbau_tokens_run.json",
+    )
+    transformer_started = any((tables / name).exists() for name in transformer_names)
+    if transformer_started:
+        if not all((tables / name).is_file() for name in transformer_names):
+            raise RuntimeError("BERTimbau preparation is incomplete.")
+        for name in ("bertimbau_assets.json", "bertimbau_tokens_run.json"):
+            record = json.loads((tables / name).read_text(encoding="utf-8"))
+            if record["fingerprint"] != manifest["fingerprint"] or not record["artifacts"] or not all(
+                (root / path).is_file() and sha256_file(root / path) == digest
+                for path, digest in record["artifacts"].items()
+            ):
+                raise RuntimeError(f"BERTimbau preparation artifacts changed: {name}")
+        preflight = json.loads((tables / "bertimbau_preflight.json").read_text(encoding="utf-8"))
+        if preflight["fingerprint"] != manifest["fingerprint"] or preflight.get("passed") is not True:
+            raise RuntimeError("BERTimbau GPU preflight does not match this execution.")
+        summary = tables / "bertimbau_token_summary.csv"
+        cached_summary = root / next(name for name in record["artifacts"] if name.endswith(".summary.csv"))
+        if sha256_file(summary) != sha256_file(cached_summary):
+            raise RuntimeError("BERTimbau token summary changed.")
+        names.extend(transformer_names)
     missing = [name for name in names if not (tables / name).is_file()]
     if missing:
         raise FileNotFoundError(f"Missing reports: {missing}")
@@ -60,7 +83,8 @@ def export_reports(root=None, source=None, tables=None, destination=None):
             temporary.write_bytes(path.read_bytes().replace(b"\r\n", b"\n"))
             temporary.replace(target)
     write_json(destination / "report_manifest.json", {
-        "stage": ("tfidf_sgd" if sgd_completion.exists() else
+        "stage": ("bertimbau_preparation" if transformer_started else
+                  "tfidf_sgd" if sgd_completion.exists() else
                   "company_baseline" if completion.exists() else "data_preparation_and_temporal_audit"),
         "fingerprint": manifest["fingerprint"],
         "files": {name: sha256_file(destination / name) for name in names},
