@@ -15,6 +15,9 @@ def capture_git_state():
     paths = [ROOT / "main.py", ROOT / "pyproject.toml", ROOT / "uv.lock"]
     for name in ("src", "scripts", "tests"):
         paths.extend((ROOT / name).rglob("*.py"))
+    migration = ROOT / "src/consumerbr_resolution/experiments/stage_migration.json"
+    if migration.is_file():
+        paths.append(migration)
     files = {
         str(path.relative_to(ROOT)): hashlib.sha256(path.read_bytes()).hexdigest()
         for path in sorted(paths)

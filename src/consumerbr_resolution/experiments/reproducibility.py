@@ -13,7 +13,8 @@ from consumerbr_resolution.experiments.temporal_protocol import build_temporal_p
 
 PACKAGE_NAMES = (
     "duckdb", "huggingface-hub", "joblib", "numpy", "pandas", "pyarrow",
-    "requests", "scikit-learn", "scipy", "torch", "transformers", "tqdm",
+    "requests", "safetensors", "scikit-learn", "scipy", "threadpoolctl",
+    "tokenizers", "torch", "transformers", "tqdm",
 )
 
 
@@ -41,6 +42,9 @@ def source_files(root):
     paths = [root / "main.py", root / "pyproject.toml", root / "uv.lock"]
     for name in ("src", "scripts", "tests"):
         paths.extend((root / name).rglob("*.py"))
+    migration = root / "src/consumerbr_resolution/experiments/stage_migration.json"
+    if migration.is_file():
+        paths.append(migration)
     return {str(path.relative_to(root)): sha256_file(path) for path in sorted(paths)}
 
 
@@ -75,31 +79,64 @@ def execution_identity(root, source, tables):
     return identity, fingerprint, provenance
 
 
-def validate_execution(root=None, source=None, tables=None):
+def validate_execution(root=None, source=None, tables=None, stage=None):
+    from consumerbr_resolution.experiments.stage_identity import stage_identities
+
     root = Path(root) if root is not None else PROJECT_ROOT
     source = Path(source) if source is not None else FEATURE_BASE_PATH
     tables = Path(tables) if tables is not None else TABLES_DIR
     manifest = json.loads((tables / "execution_manifest.json").read_text(encoding="utf-8"))
     identity, fingerprint, _ = execution_identity(root, source, tables)
     if manifest["fingerprint"] != fingerprint or manifest["identity"] != identity:
-        raise RuntimeError("Execution inputs changed. Existing results cannot be reused.")
-    return manifest
+        raise RuntimeError("Execution inputs changed. Register the execution before reusing results.")
+    if stage is None:
+        return manifest
+    if manifest.get("schema_version") != 2:
+        raise RuntimeError("Register the execution to migrate stage identities first.")
+    expected = stage_identities(root, identity)[stage]
+    record = manifest["stages"][stage]
+    if (record["dependency_fingerprint"] != expected["dependency_fingerprint"]
+            or record["identity"] != expected["identity"]):
+        raise RuntimeError(f"Stage inputs changed: {stage}")
+    return {**manifest, "execution_fingerprint": fingerprint,
+            "fingerprint": record["artifact_fingerprint"],
+            "stage_fingerprint": record["dependency_fingerprint"], "stage": stage}
 
 
 def register_execution(root=None, source=None, tables=None):
+    from consumerbr_resolution.experiments.stage_identity import (
+        reconcile_stages, stage_identities, verify_stage_artifacts,
+    )
+
     root = Path(root) if root is not None else PROJECT_ROOT
     source = Path(source) if source is not None else FEATURE_BASE_PATH
     tables = Path(tables) if tables is not None else TABLES_DIR
     if not (root / "logs/git_state.json").is_file():
         raise FileNotFoundError("Run python3 scripts/capture_git_state.py on the host first.")
     destination = tables / "execution_manifest.json"
-    if destination.exists():
-        manifest = validate_execution(root, source, tables)
-        print(f"Execution manifest verified: {destination}")
-        return manifest
+    previous = json.loads(destination.read_text(encoding="utf-8")) if destination.exists() else None
     build_temporal_protocol(source, tables)
     identity, fingerprint, provenance = execution_identity(root, source, tables)
-    manifest = {"fingerprint": fingerprint, "identity": identity, "git": provenance}
+    stages = stage_identities(root, identity)
+    models = root / "models" / tables.parent.name
+    if previous is not None:
+        same = (previous.get("schema_version") == 2 and previous["fingerprint"] == fingerprint
+                and previous["identity"] == identity and previous["git"] == provenance
+                and all(previous["stages"].get(name, {}).get("identity") == record["identity"]
+                        for name, record in stages.items()))
+        if same:
+            for name, record in previous["stages"].items():
+                verify_stage_artifacts(root, tables, models, name, record["artifact_fingerprint"])
+            print(f"Execution manifest verified: {destination}")
+            return previous
+        stages, archive = reconcile_stages(root, tables, models, previous, stages, fingerprint)
+        print(f"Previous execution provenance preserved: {archive}")
+    else:
+        for record in stages.values():
+            record["artifact_fingerprint"] = record["dependency_fingerprint"]
+            record["origin_execution_fingerprint"] = fingerprint
+    manifest = {"schema_version": 2, "fingerprint": fingerprint, "identity": identity,
+                "git": provenance, "stages": stages}
     write_json(destination, manifest)
     print(f"Execution registered: {fingerprint}")
     return manifest

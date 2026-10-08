@@ -30,7 +30,7 @@ def export_reports(root=None, source=None, tables=None, destination=None):
         if not completion.is_file() or not metrics.is_file():
             raise RuntimeError("Company baseline is incomplete.")
         baseline = json.loads(completion.read_text(encoding="utf-8"))
-        if baseline["fingerprint"] != manifest["fingerprint"] or not all(
+        if baseline["fingerprint"] != validate_execution(root, source, tables, stage="company_baseline")["fingerprint"] or not all(
             (tables.parent / name).is_file()
             and sha256_file(tables.parent / name) == digest
             for name, digest in baseline["artifacts"].items()
@@ -42,7 +42,7 @@ def export_reports(root=None, source=None, tables=None, destination=None):
         if not sgd_completion.is_file():
             raise RuntimeError("TF-IDF + SGD is incomplete.")
         sgd = json.loads(sgd_completion.read_text(encoding="utf-8"))
-        verify_artifacts(sgd, root, manifest["fingerprint"])
+        verify_artifacts(sgd, root, validate_execution(root, source, tables, stage="tfidf_sgd")["fingerprint"])
         names.extend(REPORTS)
     transformer_names = (
         "bertimbau_assets.json", "bertimbau_preflight.json",
@@ -54,13 +54,15 @@ def export_reports(root=None, source=None, tables=None, destination=None):
             raise RuntimeError("BERTimbau preparation is incomplete.")
         for name in ("bertimbau_assets.json", "bertimbau_tokens_run.json"):
             record = json.loads((tables / name).read_text(encoding="utf-8"))
-            if record["fingerprint"] != manifest["fingerprint"] or not record["artifacts"] or not all(
+            stage = "bertimbau_assets" if name == "bertimbau_assets.json" else "bertimbau_tokens"
+            registered = validate_execution(root, source, tables, stage=stage)
+            if record["fingerprint"] != registered["fingerprint"] or not record["artifacts"] or not all(
                 (root / path).is_file() and sha256_file(root / path) == digest
                 for path, digest in record["artifacts"].items()
             ):
                 raise RuntimeError(f"BERTimbau preparation artifacts changed: {name}")
         preflight = json.loads((tables / "bertimbau_preflight.json").read_text(encoding="utf-8"))
-        if preflight["fingerprint"] != manifest["fingerprint"] or preflight.get("passed") is not True:
+        if preflight["fingerprint"] != validate_execution(root, source, tables, stage="bertimbau_preflight")["fingerprint"] or preflight.get("passed") is not True:
             raise RuntimeError("BERTimbau GPU preflight does not match this execution.")
         summary = tables / "bertimbau_token_summary.csv"
         cached_summary = root / next(name for name in record["artifacts"] if name.endswith(".summary.csv"))

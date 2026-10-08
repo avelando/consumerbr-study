@@ -22,7 +22,7 @@ def check_bertimbau_gpu(root=None, source=None, tables=None):
 
     root = Path(root) if root is not None else PROJECT_ROOT
     tables = Path(tables) if tables is not None else TABLES_DIR
-    manifest = validate_execution(root, source, tables)
+    manifest = validate_execution(root, source, tables, stage="bertimbau_preflight")
     (tables / REPORT_NAME).unlink(missing_ok=True)
     directory, assets = read_assets(root)
     if not torch.cuda.is_available():

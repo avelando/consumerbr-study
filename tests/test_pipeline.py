@@ -43,38 +43,15 @@ class PipelineTests(unittest.TestCase):
         commands = [stage.command for stage in STAGES]
         self.assertEqual(len(commands), len(set(commands)))
 
-    def test_changed_execution_preserves_results_and_models(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            tables = root / "results/study/tables"
-            models = root / "models/study"
-            tables.mkdir(parents=True)
-            models.mkdir(parents=True)
-            previous = {"fingerprint": "old-fingerprint"}
-            (tables / "execution_manifest.json").write_text(json.dumps(previous))
-            (tables / "metrics.csv").write_text("original metrics\n")
-            (models / "weights.bin").write_bytes(b"original model")
-            with patch.object(runner, "execution_identity", return_value=({}, "new-fingerprint", {})):
-                destination = runner.preserve_previous_execution(root, root / "source", tables, models)
-            self.assertEqual((destination / "results/tables/metrics.csv").read_text(), "original metrics\n")
-            self.assertEqual((destination / "models/weights.bin").read_bytes(), b"original model")
-            self.assertFalse(tables.parent.exists())
-            self.assertFalse(models.exists())
-
-    def test_matching_execution_is_preserved_in_place(self):
-        with tempfile.TemporaryDirectory() as temporary:
-            root = Path(temporary)
-            tables = root / "results/study/tables"
-            tables.mkdir(parents=True)
-            manifest = tables / "execution_manifest.json"
-            manifest.write_text(json.dumps({"fingerprint": "same"}))
-            with patch.object(runner, "execution_identity", return_value=({}, "same", {})):
-                destination = runner.preserve_previous_execution(
-                    root, root / "source", tables, root / "models/study",
-                )
-            self.assertIsNone(destination)
-            self.assertTrue(manifest.exists())
-            self.assertFalse((root / "results/archive").exists())
+    def test_host_runner_captures_state_and_runs_all(self):
+        events = []
+        with patch.object(runner, "capture_git_state", side_effect=lambda: events.append("capture")), \
+             patch.object(runner.subprocess, "run", side_effect=lambda *args, **kwargs: events.append("run")) as run:
+            runner.main()
+        self.assertEqual(events, ["capture", "run"])
+        run.assert_called_once_with(
+            [sys.executable, str(runner.ROOT / "main.py"), "all"], cwd=runner.ROOT, check=True,
+        )
 
 
 if __name__ == "__main__":

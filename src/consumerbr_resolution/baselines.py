@@ -59,7 +59,7 @@ def evaluate_historical_baselines(root=None, source=None, tables=None, predictio
     source = Path(source) if source is not None else FEATURE_BASE_PATH
     tables = Path(tables) if tables is not None else TABLES_DIR
     predictions = Path(predictions) if predictions is not None else PREDICTIONS_DIR
-    manifest = validate_execution(root, source, tables)
+    manifest = validate_execution(root, source, tables, stage="company_baseline")
     membership = tables / "split_membership.parquet"
     fingerprint = manifest["fingerprint"]
     completion = tables / "company_baseline_run.json"

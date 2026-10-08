@@ -1,0 +1,243 @@
+{
+  "stages": {
+    "company_baseline": {
+      "files": {
+        "src/consumerbr_resolution/baselines.py": "a5a2bad194c2868b1011eec9fc6106d51ab4f42b032640fc283be92f3537e6f9",
+        "src/consumerbr_resolution/evaluation/metrics.py": "71601c8396cae3e41ae5d73f181385be2680ffffd046196b54ccd3dbe2aaba87",
+        "src/consumerbr_resolution/experiments/reproducibility.py#sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+        "src/consumerbr_resolution/experiments/reproducibility.py#write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+      },
+      "raw_files": {
+        "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+        "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4",
+        "src/consumerbr_resolution/baselines.py": "6bd5ad84d55c15d90423d115cae030794ae825b982bbaa272d1eaf582363145f",
+        "src/consumerbr_resolution/evaluation/metrics.py": "d247561c4e6f99f4a3327c641eda795da85af95a1807e3689a70e878e23c2f31",
+        "src/consumerbr_resolution/experiments/reproducibility.py": "e2fa9e88f986f97269a8c2ea4dc65877ede05aa084f0b8c1e3ff61c3e346d554"
+      },
+      "config": {
+        "COMPANY_HISTORY_SMOOTHING": 100.0
+      }
+    },
+    "tfidf_sgd": {
+      "files": {
+        "src/consumerbr_resolution/modeling/tfidf_sgd.py": "66234c18f7656ee32239264e2eba83d032d95beca0a7611d8c658954a0c569d1",
+        "src/consumerbr_resolution/modeling/tfidf.py": "dc4cc94c3ab1652ecb6069475a6ae65c51b14e0d94c8ba39abaf213d55e13fd0",
+        "src/consumerbr_resolution/evaluation/metrics.py": "71601c8396cae3e41ae5d73f181385be2680ffffd046196b54ccd3dbe2aaba87",
+        "src/consumerbr_resolution/baselines.py#write_predictions": "5d654a090bced37137b3d864309b3d5d329dc1763430f28638f3a4b2004b085c",
+        "src/consumerbr_resolution/experiments/temporal_protocol.py#write_csv": "6792322fa22c3c9030884bbf671bf2438bb275ccbf0a08230d319b6a40cdda0e",
+        "src/consumerbr_resolution/experiments/reproducibility.py#sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+        "src/consumerbr_resolution/experiments/reproducibility.py#write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+      },
+      "raw_files": {
+        "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+        "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4",
+        "src/consumerbr_resolution/modeling/tfidf_sgd.py": "d2e3d56cf3ca80583713527d4c6e8a39528679302fb8f585e14e4c64ead5a803",
+        "src/consumerbr_resolution/modeling/tfidf.py": "0979099272fb780bb4d9ff40e8977a745c97c241b0ed1b9333a245b54dc7019d",
+        "src/consumerbr_resolution/evaluation/metrics.py": "d247561c4e6f99f4a3327c641eda795da85af95a1807e3689a70e878e23c2f31",
+        "src/consumerbr_resolution/baselines.py": "6bd5ad84d55c15d90423d115cae030794ae825b982bbaa272d1eaf582363145f",
+        "src/consumerbr_resolution/experiments/temporal_protocol.py": "2e142800231eca31002d46160f047b1fe5f352862b4682923c5eca5dcd90ce88",
+        "src/consumerbr_resolution/experiments/reproducibility.py": "e2fa9e88f986f97269a8c2ea4dc65877ede05aa084f0b8c1e3ff61c3e346d554"
+      },
+      "config": {
+        "EXPERIMENT_SEEDS": [
+          42,
+          13,
+          101
+        ],
+        "PRIMARY_EXPERIMENT_SEED": 42,
+        "SGD_ALPHA_CANDIDATES": [
+          1e-06,
+          1e-05,
+          0.0001
+        ],
+        "SGD_BATCH_SIZE": 10000,
+        "SGD_EPOCHS": 10,
+        "SGD_LOSS": "log_loss",
+        "SGD_PENALTY": "l2",
+        "TFIDF_LOWERCASE": true,
+        "TFIDF_MAX_DF": 0.9,
+        "TFIDF_MAX_FEATURES": 100000,
+        "TFIDF_MIN_DF": 5,
+        "TFIDF_NGRAM_RANGE": [
+          1,
+          2
+        ],
+        "TFIDF_STRIP_ACCENTS": "unicode",
+        "TFIDF_SUBLINEAR_TF": true
+      }
+    },
+    "bertimbau_assets": {
+      "files": {
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "ff0d5834d1440963374d173b1a64fd9cf72f537de7a697045cae9ddbc1a29dd2",
+        "src/consumerbr_resolution/experiments/reproducibility.py#sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+        "src/consumerbr_resolution/experiments/reproducibility.py#write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+      },
+      "raw_files": {
+        "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+        "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4",
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "a5a39bd82d67d8c44ed79c4fb7fe037db52507a9c75ba4e527112945c3afb0fc",
+        "src/consumerbr_resolution/experiments/reproducibility.py": "e2fa9e88f986f97269a8c2ea4dc65877ede05aa084f0b8c1e3ff61c3e346d554"
+      },
+      "config": {
+        "BERTIMBAU_MODEL_NAME": "neuralmind/bert-base-portuguese-cased",
+        "BERTIMBAU_REVISION": "74364c8dbc30e651fee36aa714a772dcaae83815",
+        "BERTIMBAU_PRETRAINED_DIR": "data/interim/bertimbau/pretrained"
+      }
+    },
+    "bertimbau_preflight": {
+      "files": {
+        "src/consumerbr_resolution/modeling/bertimbau_preflight.py": "c9b4a2bca2a71f1b332e7025ac54c2581f0dd31a2c04db780f7f254f14b1d577",
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "ff0d5834d1440963374d173b1a64fd9cf72f537de7a697045cae9ddbc1a29dd2",
+        "src/consumerbr_resolution/experiments/reproducibility.py#sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+        "src/consumerbr_resolution/experiments/reproducibility.py#write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+      },
+      "raw_files": {
+        "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+        "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4",
+        "src/consumerbr_resolution/modeling/bertimbau_preflight.py": "a331364618449a7a63f1945f050a75079c13d17e77100867e72234d3f15d80f3",
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "a5a39bd82d67d8c44ed79c4fb7fe037db52507a9c75ba4e527112945c3afb0fc",
+        "src/consumerbr_resolution/experiments/reproducibility.py": "e2fa9e88f986f97269a8c2ea4dc65877ede05aa084f0b8c1e3ff61c3e346d554"
+      },
+      "config": {
+        "BERTIMBAU_MODEL_NAME": "neuralmind/bert-base-portuguese-cased",
+        "BERTIMBAU_REVISION": "74364c8dbc30e651fee36aa714a772dcaae83815",
+        "BERTIMBAU_PRETRAINED_DIR": "data/interim/bertimbau/pretrained",
+        "BERTIMBAU_EVAL_BATCH_SIZE": 32,
+        "BERTIMBAU_GRADIENT_ACCUMULATION_STEPS": 4,
+        "BERTIMBAU_GRADIENT_CHECKPOINTING": true,
+        "BERTIMBAU_LEARNING_RATE": 2e-05,
+        "BERTIMBAU_MAX_GRAD_NORM": 1.0,
+        "BERTIMBAU_MAX_LENGTH": 256,
+        "BERTIMBAU_TRAIN_BATCH_SIZE": 8,
+        "BERTIMBAU_USE_AMP": true,
+        "BERTIMBAU_WEIGHT_DECAY": 0.01,
+        "PRIMARY_EXPERIMENT_SEED": 42
+      }
+    },
+    "bertimbau_tokens": {
+      "files": {
+        "src/consumerbr_resolution/modeling/bertimbau_tokens.py": "63c83489950994304e5e7f3ad5114d17b6e6b8aea171f95bbc59305e121f9a4d",
+        "src/consumerbr_resolution/modeling/transformer_tokenization.py": "4b0bf47f25fcdf1d949b761d458009845d4ce21ebcbf9ca748794a569cadc900",
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "ff0d5834d1440963374d173b1a64fd9cf72f537de7a697045cae9ddbc1a29dd2",
+        "src/consumerbr_resolution/experiments/temporal_protocol.py#write_csv": "6792322fa22c3c9030884bbf671bf2438bb275ccbf0a08230d319b6a40cdda0e",
+        "src/consumerbr_resolution/experiments/reproducibility.py#sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+        "src/consumerbr_resolution/experiments/reproducibility.py#write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+      },
+      "raw_files": {
+        "src/consumerbr_resolution/config.py": "421930b98a7e963e620bb66f805eddc220aad660442fe5de5a7b602234c7175a",
+        "uv.lock": "96bc51ab47b60077752347332a6b63a11eb97dbaa885f89b65ab3df17c35a8b4",
+        "src/consumerbr_resolution/modeling/bertimbau_tokens.py": "8501a7c453305c80b250cc0e272722cd3bcf912a6a16a65b206660e858045bcb",
+        "src/consumerbr_resolution/modeling/transformer_tokenization.py": "8b40c20b17bb100f454e9a3eb7b22595bdcb0206d67fa7cbb465223851ec4f3a",
+        "src/consumerbr_resolution/modeling/bertimbau_assets.py": "a5a39bd82d67d8c44ed79c4fb7fe037db52507a9c75ba4e527112945c3afb0fc",
+        "src/consumerbr_resolution/experiments/temporal_protocol.py": "2e142800231eca31002d46160f047b1fe5f352862b4682923c5eca5dcd90ce88",
+        "src/consumerbr_resolution/experiments/reproducibility.py": "e2fa9e88f986f97269a8c2ea4dc65877ede05aa084f0b8c1e3ff61c3e346d554"
+      },
+      "config": {
+        "BERTIMBAU_MODEL_NAME": "neuralmind/bert-base-portuguese-cased",
+        "BERTIMBAU_REVISION": "74364c8dbc30e651fee36aa714a772dcaae83815",
+        "BERTIMBAU_PRETRAINED_DIR": "data/interim/bertimbau/pretrained",
+        "BERTIMBAU_MAX_LENGTH": 256,
+        "BERTIMBAU_TOKENIZATION_BATCH_SIZE": 2048,
+        "BERTIMBAU_TOKEN_CACHE_PATH": "data/interim/tokenized/bertimbau_base_tokens.parquet"
+      }
+    }
+  },
+  "source_compatibility": {
+    "8f2913763d467f5e774b3b4f1f888e309e0150c7fe1d356cbe26de86f66d2844": {
+      "module": "a5a2bad194c2868b1011eec9fc6106d51ab4f42b032640fc283be92f3537e6f9",
+      "write_predictions": "5d654a090bced37137b3d864309b3d5d329dc1763430f28638f3a4b2004b085c"
+    },
+    "911dbbc4ccfb5e8fd1ec5a3d4f65474de52ba2cbc57c0d4e76c55546c1714011": {
+      "sha256_file": "9e78fb7ef88556dd44ab512609cf66ed316371fb0c1d327db0bb53a1784db70a",
+      "write_json": "ac636f6efc5db10c00e8391d8b5a7c7e6e01569a990b149ad0d2e817dc64db05"
+    },
+    "4bc5648012bfadea481885e1e808dac0ec033a60cc62e4db075bbcabcb38414c": {
+      "module": "66234c18f7656ee32239264e2eba83d032d95beca0a7611d8c658954a0c569d1"
+    },
+    "a0169e8ce9a42b4b70a552c242ed97a553df6cf1e1326531fdc3bbb27817a83c": {
+      "module": "ff0d5834d1440963374d173b1a64fd9cf72f537de7a697045cae9ddbc1a29dd2"
+    },
+    "13cd4bd0c4bd268fe610b0df6e702807ada72eebf6b4a515c27bd6a1473e0ced": {
+      "module": "c9b4a2bca2a71f1b332e7025ac54c2581f0dd31a2c04db780f7f254f14b1d577"
+    },
+    "3ab6b71b3c15c300d89f38c19d96602045246fe87cd2597d131c3d88136adb77": {
+      "module": "63c83489950994304e5e7f3ad5114d17b6e6b8aea171f95bbc59305e121f9a4d"
+    }
+  },
+  "locked_packages": {
+    "annotated-doc": "0.0.5",
+    "anyio": "4.15.1",
+    "certifi": "2026.7.22",
+    "charset-normalizer": "3.5.2",
+    "click": "8.5.0",
+    "cloudpickle": "3.1.2",
+    "colorama": "0.4.6",
+    "consumerbr-resolution-prediction": "0.2.0",
+    "cuda-bindings": "13.4.3",
+    "cuda-pathfinder": "1.8.3",
+    "cuda-toolkit": "13.0.3.0",
+    "duckdb": "1.5.6",
+    "filelock": "4.0.12",
+    "fsspec": "2026.9.0",
+    "h11": "0.16.0",
+    "hf-xet": "1.7.0",
+    "httpcore": "1.0.9",
+    "httpx": "0.28.1",
+    "huggingface-hub": "1.33.0",
+    "idna": "3.20",
+    "jinja2": "3.1.6",
+    "joblib": "1.6.0",
+    "markdown-it-py": "4.2.0",
+    "markupsafe": "3.0.4",
+    "mdurl": "0.1.2",
+    "mpmath": "1.3.0",
+    "narwhals": "2.26.0",
+    "networkx": "3.7",
+    "numpy": "2.5.3",
+    "nvidia-cublas": "13.1.1.3",
+    "nvidia-cuda-cupti": "13.0.85",
+    "nvidia-cuda-nvrtc": "13.0.88",
+    "nvidia-cuda-runtime": "13.0.96",
+    "nvidia-cudnn-cu13": "9.20.0.48",
+    "nvidia-cufft": "12.0.0.61",
+    "nvidia-cufile": "1.15.1.6",
+    "nvidia-curand": "10.4.0.35",
+    "nvidia-cusolver": "12.0.4.66",
+    "nvidia-cusparse": "12.6.3.3",
+    "nvidia-cusparselt-cu13": "0.8.1",
+    "nvidia-nccl-cu13": "2.29.7",
+    "nvidia-nvjitlink": "13.4.92",
+    "nvidia-nvshmem-cu13": "3.4.5",
+    "nvidia-nvtx": "13.0.85",
+    "packaging": "26.3",
+    "pandas": "3.0.6",
+    "pyarrow": "25.0.1",
+    "pygments": "2.21.0",
+    "python-dateutil": "2.9.0.post0",
+    "pyyaml": "6.0.3",
+    "regex": "2026.9.29",
+    "requests": "2.34.2",
+    "rich": "15.0.0",
+    "safetensors": "0.8.0",
+    "scikit-learn": "1.9.1",
+    "scipy": "1.18.1",
+    "setuptools": "84.0.0",
+    "shellingham": "1.5.4",
+    "six": "1.17.0",
+    "sympy": "1.14.0",
+    "threadpoolctl": "3.7.0",
+    "tokenizers": "0.23.2",
+    "torch": "2.13.0+cu130",
+    "tqdm": "4.70.1",
+    "transformers": "5.19.0",
+    "triton": "3.7.1",
+    "typer": "0.27.3",
+    "typing-extensions": "4.16.0",
+    "tzdata": "2026.5",
+    "urllib3": "2.8.0"
+  },
+  "token_processor": {
+    "previous": "8501a7c453305c80b250cc0e272722cd3bcf912a6a16a65b206660e858045bcb",
+    "installed": "3ab6b71b3c15c300d89f38c19d96602045246fe87cd2597d131c3d88136adb77"
+  }
+}

@@ -17,6 +17,7 @@ from consumerbr_resolution.config import (
     FEATURE_BASE_PATH, PROJECT_ROOT, TABLES_DIR,
 )
 from consumerbr_resolution.experiments.reproducibility import sha256_file, validate_execution, write_json
+from consumerbr_resolution.experiments.stage_identity import compatible_source_hash
 from consumerbr_resolution.experiments.temporal_protocol import write_csv
 from consumerbr_resolution.modeling.bertimbau_assets import read_assets
 from consumerbr_resolution.modeling import transformer_tokenization as encoding
@@ -30,7 +31,7 @@ def build_bertimbau_token_cache(root=None, source=None, tables=None, tokenizer=N
     root = Path(root) if root is not None else PROJECT_ROOT
     source = Path(source) if source is not None else FEATURE_BASE_PATH
     tables = Path(tables) if tables is not None else TABLES_DIR
-    manifest = validate_execution(root, source, tables)
+    manifest = validate_execution(root, source, tables, stage="bertimbau_tokens")
     directory, assets = read_assets(root)
     cache = root / BERTIMBAU_TOKEN_CACHE_PATH.relative_to(PROJECT_ROOT)
     marker = cache.with_suffix(".run.json")
@@ -46,7 +47,7 @@ def build_bertimbau_token_cache(root=None, source=None, tables=None, tokenizer=N
         "membership": manifest["identity"]["membership_sha256"],
         "assets": assets["artifacts"], "max_length": BERTIMBAU_MAX_LENGTH, "strategy": "head",
         "tokenizer_packages": tokenizer_packages,
-        "processor": sha256_file(Path(__file__)), "encoding": sha256_file(Path(encoding.__file__)),
+        "processor": compatible_source_hash(Path(__file__)), "encoding": sha256_file(Path(encoding.__file__)),
     }
     token_fingerprint = hashlib.sha256(json.dumps(identity, sort_keys=True).encode()).hexdigest()
     previous = json.loads(marker.read_text(encoding="utf-8")) if marker.exists() else None

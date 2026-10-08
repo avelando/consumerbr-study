@@ -96,7 +96,7 @@ def evaluate_tfidf_sgd(root=None, source=None, tables=None):
     root = Path(root) if root is not None else PROJECT_ROOT
     source = Path(source) if source is not None else FEATURE_BASE_PATH
     tables = Path(tables) if tables is not None else TABLES_DIR
-    manifest = validate_execution(root, source, tables)
+    manifest = validate_execution(root, source, tables, stage="tfidf_sgd")
     fingerprint = manifest["fingerprint"]
     protocol = manifest["identity"]["protocol"]
     expected = {

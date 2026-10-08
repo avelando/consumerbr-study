@@ -34,7 +34,7 @@ def read_assets(root):
 def prepare_bertimbau_assets(root=None, source=None, tables=None, downloader=None, repo_files=None):
     root = Path(root) if root is not None else PROJECT_ROOT
     tables = Path(tables) if tables is not None else TABLES_DIR
-    manifest = validate_execution(root, source, tables)
+    manifest = validate_execution(root, source, tables, stage="bertimbau_assets")
     directory = asset_directory(root)
     marker = directory.parent / "pretrained_run.json"
     if not marker.exists():

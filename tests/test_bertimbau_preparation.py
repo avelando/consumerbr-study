@@ -7,7 +7,7 @@ import pyarrow.parquet as pq
 
 import test_company_baseline as fixtures
 from consumerbr_resolution.experiments.report_export import PREPARATION_REPORTS, export_reports
-from consumerbr_resolution.experiments.reproducibility import register_execution, source_files, write_json
+from consumerbr_resolution.experiments.reproducibility import register_execution, source_files, validate_execution, write_json
 from consumerbr_resolution.modeling.bertimbau_assets import prepare_bertimbau_assets
 from consumerbr_resolution.modeling.bertimbau_preflight import check_bertimbau_gpu
 from consumerbr_resolution.modeling.bertimbau_tokens import build_bertimbau_token_cache
@@ -72,13 +72,12 @@ class BertimbauPreparationTests(unittest.TestCase):
         previous = self.tokenize()
         (self.root / "main.py").write_text("new training entry point\n")
         write_json(self.root / "logs/git_state.json", {"files": source_files(self.root)})
-        (self.tables / "execution_manifest.json").unlink()
         register_execution(self.root, self.source, self.tables)
         tokenizer = FakeTokenizer()
         with patch.object(FakeTokenizer, "__call__", side_effect=AssertionError("retokenized")):
             current = self.tokenize(tokenizer)
         self.assertEqual(previous["token_fingerprint"], current["token_fingerprint"])
-        self.assertNotEqual(previous["fingerprint"], current["fingerprint"])
+        self.assertEqual(previous["fingerprint"], current["fingerprint"])
 
     def test_corrupted_cache_is_rejected(self):
         report = self.tokenize()
@@ -105,7 +104,8 @@ class BertimbauPreparationTests(unittest.TestCase):
     def test_export_contains_preparation_aggregates_only(self):
         self.tokenize()
         write_json(self.tables / "bertimbau_preflight.json", {
-            "fingerprint": self.manifest["fingerprint"], "passed": True,
+            "fingerprint": validate_execution(self.root, self.source, self.tables,
+                                               stage="bertimbau_preflight")["fingerprint"], "passed": True,
         })
         for name in PREPARATION_REPORTS:
             path = self.tables / name
