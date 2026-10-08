@@ -12,7 +12,7 @@ from sklearn.metrics import (
     roc_auc_score,
 )
 
-from consumerbr_resolution.analysis_registry import (
+from consumerbr_resolution.evaluation.analysis_registry import (
     MODEL_PREDICTION_SPECS,
     get_prediction_path,
 )

@@ -21,11 +21,11 @@ from consumerbr_resolution.config import (
     TFIDF_SGD_MODELS_DIR,
     create_project_directories,
 )
-from consumerbr_resolution.evaluation import (
+from consumerbr_resolution.evaluation.metrics import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )
-from consumerbr_resolution.hyperparameter_selection import (
+from consumerbr_resolution.modeling.hyperparameter_selection import (
     get_selected_sgd_alpha,
 )
 

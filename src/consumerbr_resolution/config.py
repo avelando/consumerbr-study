@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from consumerbr_resolution.temporal_design import (
+from consumerbr_resolution.experiments.temporal_design import (
     generate_temporal_folds,
     validate_temporal_folds,
 )

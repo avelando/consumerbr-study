@@ -18,7 +18,7 @@ from consumerbr_resolution.config import (
     TUNING_VALIDATION_START,
     create_project_directories,
 )
-from consumerbr_resolution.temporal_design import (
+from consumerbr_resolution.experiments.temporal_design import (
     generate_temporal_folds,
     generate_test_window_candidates,
     validate_temporal_folds,

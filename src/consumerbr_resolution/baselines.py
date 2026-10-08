@@ -11,7 +11,7 @@ from consumerbr_resolution.config import (
     TEMPORAL_FOLDS,
     create_project_directories,
 )
-from consumerbr_resolution.evaluation import (
+from consumerbr_resolution.evaluation.metrics import (
     calculate_binary_metrics,
     find_best_macro_f1_threshold,
 )

@@ -10,7 +10,7 @@ from consumerbr_resolution.config import (
     TABLES_DIR,
     create_project_directories,
 )
-from consumerbr_resolution.transformer_tokenization import (
+from consumerbr_resolution.modeling.transformer_tokenization import (
     TokenCacheSpec,
     build_transformer_token_caches,
 )

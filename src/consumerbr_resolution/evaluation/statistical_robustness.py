@@ -4,7 +4,7 @@ from itertools import combinations
 import duckdb
 import numpy as np
 
-from consumerbr_resolution.analysis_registry import (
+from consumerbr_resolution.evaluation.analysis_registry import (
     MODEL_PREDICTION_SPECS,
     get_prediction_path,
 )
