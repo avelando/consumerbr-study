@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import duckdb
 
 from consumerbr_resolution.config import (
@@ -27,7 +34,12 @@ OBSERVATION_TEXT_PATH = (
 
 
 def analyze_outcome_observation():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     output_paths = [
         STATUS_DISTRIBUTION_PATH,

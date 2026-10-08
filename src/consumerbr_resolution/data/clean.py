@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import duckdb
 
 from consumerbr_resolution.config import (
@@ -10,7 +17,12 @@ from consumerbr_resolution.config import (
 
 
 def clean_modeling_base():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     if CLEAN_BASE_PATH.exists():
         print(f"Clean modeling base already exists: {CLEAN_BASE_PATH}")

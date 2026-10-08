@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import csv
 
 import duckdb
@@ -46,7 +53,12 @@ REQUIRED_FEATURE_COLUMNS = {
 
 
 def validate_dataset_integrity():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     if not FEATURE_BASE_PATH.exists():
         raise FileNotFoundError(

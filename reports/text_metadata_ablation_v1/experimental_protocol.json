@@ -1,0 +1,75 @@
+{
+  "experiment_id": "text_metadata_ablation_v1",
+  "source_path": "data/processed/consumerbr_feature_base.parquet",
+  "source_size_bytes": 440780544,
+  "source_mtime_ns": 1791431776020329790,
+  "observation_end": "2025-04-03",
+  "windows": [
+    {
+      "split": "train",
+      "start_date": "2021-05-01",
+      "end_date": "2023-11-30",
+      "included": true
+    },
+    {
+      "split": "gap_train_validation",
+      "start_date": "2023-12-01",
+      "end_date": "2023-12-31",
+      "included": false
+    },
+    {
+      "split": "validation",
+      "start_date": "2024-01-01",
+      "end_date": "2024-08-31",
+      "included": true
+    },
+    {
+      "split": "gap_validation_test",
+      "start_date": "2024-09-01",
+      "end_date": "2024-09-30",
+      "included": false
+    },
+    {
+      "split": "test",
+      "start_date": "2024-10-01",
+      "end_date": "2025-03-31",
+      "included": true
+    },
+    {
+      "split": "after_test",
+      "start_date": "2025-04-01",
+      "end_date": "2025-04-03",
+      "included": false
+    }
+  ],
+  "models": [
+    "company_historical_rate",
+    "tfidf_sgd",
+    "bertimbau",
+    "bertimbau_metadata_without_company",
+    "bertimbau_metadata_with_company"
+  ],
+  "seeds": [
+    42,
+    13,
+    101
+  ],
+  "selection_seed": 42,
+  "primary_metric": "macro_f1",
+  "threshold_fit_split": "validation",
+  "sgd_alpha_candidates": [
+    1e-06,
+    1e-05,
+    0.0001
+  ],
+  "sgd_max_epochs": 10,
+  "bertimbau_learning_rate_candidates": [
+    1e-05,
+    2e-05
+  ],
+  "bertimbau_max_epochs": 3,
+  "company_history_smoothing": 100.0,
+  "bootstrap_replicates": 2000,
+  "prior_test_inspection": true,
+  "gap_is_label_maturation_approximation": true
+}

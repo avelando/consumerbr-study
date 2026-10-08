@@ -1,0 +1,2 @@
+mean_text_char_count,median_text_char_count,p90_text_char_count,p95_text_char_count,mean_text_word_count,median_text_word_count,p90_text_word_count,p95_text_word_count,mean_exclamation_count,mean_question_count,mean_anonymization_marker_count,max_anonymization_marker_count,anonymization_marker_rate
+810.806582449762,603.0,1767.0,2337.0,129.48186375176402,97.0,281.0,369.0,0.30652948673703345,0.14334664812391298,7.393015714642055,350,0.9065083015270436

@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import hashlib
 import json
 
@@ -225,7 +232,12 @@ def load_download_manifest():
 
 
 def download_corpus():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     if CORPUS_ARCHIVE_PATH.exists():
         metadata = (

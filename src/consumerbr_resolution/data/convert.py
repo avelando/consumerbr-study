@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import duckdb
 
 from consumerbr_resolution.config import (
@@ -8,7 +15,12 @@ from consumerbr_resolution.config import (
 
 
 def convert_corpus_to_parquet():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     if CORPUS_PARQUET_PATH.exists():
         print(f"Corpus Parquet already exists: {CORPUS_PARQUET_PATH}")

@@ -1,0 +1,10 @@
+criterion,value,passed
+nonempty_source,1463285,True
+unique_record_ids,0,True
+valid_required_values,0,True
+dates_inside_observation_horizon,0,True
+complaint_ids_do_not_cross_partitions,0,True
+both_classes_in_train,453239/372193,True
+both_classes_in_validation,182988/144621,True
+both_classes_in_test,122453/118313,True
+all_rows_accounted_for,1463285,True

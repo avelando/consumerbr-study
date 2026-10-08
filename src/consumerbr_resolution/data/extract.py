@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 from pathlib import Path
 import zipfile
 
@@ -11,7 +18,12 @@ from consumerbr_resolution.config import (
 
 
 def extract_corpus():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     if CORPUS_CSV_PATH.exists():
         print(f"Corpus CSV already exists: {CORPUS_CSV_PATH}")

@@ -1,0 +1,3 @@
+observed_outcome,outcome_group,complaint_count,mean_text_char_count,median_text_char_count,p90_text_char_count
+1,observed,1463323,810.7863205867741,603.0,1766.0
+0,not_observed,1687229,738.8698753992493,536.0,1636.0

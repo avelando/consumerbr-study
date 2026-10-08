@@ -503,8 +503,8 @@ METADATA_NUMERIC_FEATURES = (
     "opening_weekday_cos",
 )
 
-def create_project_directories():
-    directories = (
+def create_project_directories(*requested_directories):
+    directories = requested_directories or (
         RAW_DATA_DIR,
         INTERIM_DATA_DIR,
         PROCESSED_DATA_DIR,

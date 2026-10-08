@@ -1,0 +1,19 @@
+{
+  "stage": "data_preparation_and_temporal_audit",
+  "files": {
+    "dataset_integrity_audit.csv": "d1c3511dd198e6115d85db5d1da10a58bd112071a742f37c26ddd08fbdac9683",
+    "temporal_protocol_audit.csv": "25a9713888d38831a7f92fe4992dc65f4ef4743153c7f1c3fa4ffa5ffc987f50",
+    "temporal_split_summary.csv": "3235118da18eda6e03012f6c2bc9e714834ece7c87ac518b5bb4f67790050c20",
+    "temporal_text_overlap.csv": "8744612a755b9ace089206f0ad51dcb4cdd910e275c2fe6c988aa989995acf52",
+    "dataset_overview.csv": "299172348fa1b66629415a13e87ee5e72e3827495760e8fba85842eb8bf31cfd",
+    "class_distribution.csv": "628904ad655d58bb150b849fb44650a7c4ed1f8e7348df048793ccfa881709c4",
+    "monthly_distribution.csv": "693884bfdf0000d5435bf219826b528c0e5daeb96569f6ef834ca5826879146d",
+    "uf_distribution.csv": "561177d469cd75419ad90e3640f39b7074b7c7f8c1ae071af5979ebb36b035b2",
+    "feature_summary.csv": "064405e92b45b231d69766c74cbadf67105f2855da5224e37f1fbdbe92fa005c",
+    "outcome_status_distribution.csv": "b594564ddd0069a3c33ddc3617a13d00e51760c08df68a5ad32a40e93ba69a4e",
+    "outcome_observation_summary.csv": "1daed7c3faf9bd39d28123eae2223dedaec2c49be0bd813f0352ed4cf443a614",
+    "outcome_observation_monthly.csv": "05dbb177247423bb6bef89ad3a8df647b98709fe9742c3dc6ed0ad2ac23951a1",
+    "outcome_observation_text.csv": "3f61aa15cc271da1166e10236b82d695dda4086b6451dfa157169a915432801c",
+    "experimental_protocol.json": "904c3136b313603112fb7f3fa78acafbdc33428922744cf7894a3366a20da1a8"
+  }
+}

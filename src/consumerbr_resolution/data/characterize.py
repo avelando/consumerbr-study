@@ -1,3 +1,10 @@
+from consumerbr_resolution.config import (
+    RAW_DATA_DIR,
+    INTERIM_DATA_DIR,
+    PROCESSED_DATA_DIR,
+    TABLES_DIR,
+)
+
 import duckdb
 
 from consumerbr_resolution.config import (
@@ -16,7 +23,12 @@ FEATURE_SUMMARY_PATH = TABLES_DIR / "feature_summary.csv"
 
 
 def characterize_dataset():
-    create_project_directories()
+    create_project_directories(
+        RAW_DATA_DIR,
+        INTERIM_DATA_DIR,
+        PROCESSED_DATA_DIR,
+        TABLES_DIR,
+    )
 
     output_paths = [
         DATASET_OVERVIEW_PATH,
