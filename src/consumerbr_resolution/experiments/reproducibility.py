@@ -1,445 +1,105 @@
 import hashlib
 import json
-import os
 import platform
-import subprocess
-from importlib.metadata import (
-    PackageNotFoundError,
-    version,
-)
-
-import torch
+from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 
 from consumerbr_resolution.config import (
-    ALBERTINA_MODEL_NAME,
-    ALBERTINA_REVISION,
-    BERTIMBAU_MODEL_NAME,
-    BERTIMBAU_REVISION,
-    DATA_DIR,
-    EXPERIMENT_SEEDS,
-    FEATURE_BASE_PATH,
-    METRICS_DIR,
-    MODELS_DIR,
-    PREDICTIONS_DIR,
-    PRIMARY_EXPERIMENT_SEED,
-    RANDOM_SEED,
-    RESULTS_DIR,
-    TABLES_DIR,
-    TEMPORAL_FOLDS,
-    create_project_directories,
+    BERTIMBAU_MAX_LENGTH, BERTIMBAU_MODEL_NAME, BERTIMBAU_REVISION,
+    FEATURE_BASE_PATH, PROJECT_ROOT, TABLES_DIR,
 )
-
-
-OFFICIAL_RUN_MANIFEST_PATH = (
-    TABLES_DIR
-    / "official_run_manifest.json"
-)
+from consumerbr_resolution.experiments.temporal_protocol import build_temporal_protocol
 
 
 PACKAGE_NAMES = (
-    "catboost",
-    "duckdb",
-    "huggingface-hub",
-    "joblib",
-    "numpy",
-    "pandas",
-    "pyarrow",
-    "requests",
-    "scikit-learn",
-    "scipy",
-    "torch",
-    "transformers",
-    "tqdm",
+    "duckdb", "huggingface-hub", "joblib", "numpy", "pandas", "pyarrow",
+    "requests", "scikit-learn", "scipy", "torch", "transformers", "tqdm",
 )
-
-
-def run_git(
-    *arguments,
-    required=True,
-):
-    result = subprocess.run(
-        [
-            "git",
-            *arguments,
-        ],
-        check=False,
-        capture_output=True,
-        text=True,
-    )
-
-    if (
-        required
-        and result.returncode != 0
-    ):
-        raise RuntimeError(
-            result.stderr.strip()
-            or "Git command failed."
-        )
-
-    if result.returncode != 0:
-        return None
-
-    return result.stdout.strip()
 
 
 def sha256_file(path):
     digest = hashlib.sha256()
-
-    with path.open("rb") as file:
-        while True:
-            chunk = file.read(
-                8 * 1024 * 1024
-            )
-
-            if not chunk:
-                break
-
-            digest.update(chunk)
-
+    with Path(path).open("rb") as file:
+        for block in iter(lambda: file.read(8 * 1024 * 1024), b""):
+            digest.update(block)
     return digest.hexdigest()
 
 
-def directory_has_files(path):
-    if not path.exists():
-        return False
-
-    return any(
-        candidate.is_file()
-        for candidate
-        in path.rglob("*")
-    )
-
-
-def get_package_versions():
-    versions = {}
-
-    for package_name in (
-        PACKAGE_NAMES
-    ):
-        try:
-            versions[
-                package_name
-            ] = version(
-                package_name
-            )
-        except PackageNotFoundError:
-            versions[
-                package_name
-            ] = None
-
-    return versions
-
-
-def get_git_state():
-    return {
-        "commit": run_git(
-            "rev-parse",
-            "HEAD",
-        ),
-        "branch": run_git(
-            "rev-parse",
-            "--abbrev-ref",
-            "HEAD",
-        ),
-        "tag": run_git(
-            "describe",
-            "--tags",
-            "--exact-match",
-            "HEAD",
-            required=False,
-        ),
-        "status": run_git(
-            "status",
-            "--porcelain",
-        ),
-    }
-
-
-def official_mode_enabled():
-    return (
-        os.environ.get(
-            "CONSUMERBR_OFFICIAL_RUN",
-            "0",
-        )
-        == "1"
-    )
-
-
-def validate_official_git_state(
-    git_state,
-):
-    if git_state["branch"] != "main":
-        raise RuntimeError(
-            "Official execution must "
-            "run from the main branch."
-        )
-
-    if git_state["status"]:
-        raise RuntimeError(
-            "Official execution requires "
-            "a clean Git working tree."
-        )
-
-    if not git_state["tag"]:
-        raise RuntimeError(
-            "Official execution requires "
-            "HEAD to have an exact Git tag."
-        )
-
-    if not torch.cuda.is_available():
-        raise RuntimeError(
-            "CUDA is required for the "
-            "official transformer evaluation."
-        )
-
-
-def validate_official_run_preflight():
-    if not official_mode_enabled():
-        print(
-            "Official-run mode is disabled; "
-            "strict preflight checks were skipped."
-        )
-        return
-
-    git_state = get_git_state()
-
-    validate_official_git_state(
-        git_state
-    )
-
-    if not OFFICIAL_RUN_MANIFEST_PATH.exists():
-        stale_roots = [
-            path
-            for path in (
-                DATA_DIR,
-                MODELS_DIR,
-                RESULTS_DIR,
-            )
-            if directory_has_files(path)
-        ]
-
-        if stale_roots:
-            raise RuntimeError(
-                "A new official execution must "
-                "start without pre-existing "
-                "data, model, or result files: "
-                + ", ".join(
-                    str(path)
-                    for path
-                    in stale_roots
-                )
-            )
-
-    print(
-        "Official-run preflight validation passed."
-    )
-
-
-def build_manifest(
-    git_state,
-):
-    cuda_available = (
-        torch.cuda.is_available()
-    )
-
-    gpu = None
-
-    if cuda_available:
-        properties = (
-            torch.cuda
-            .get_device_properties(0)
-        )
-
-        gpu = {
-            "name": (
-                torch.cuda
-                .get_device_name(0)
-            ),
-            "total_memory_bytes": int(
-                properties.total_memory
-            ),
-        }
-
-    return {
-        "git": {
-            "commit": (
-                git_state[
-                    "commit"
-                ]
-            ),
-            "branch": (
-                git_state[
-                    "branch"
-                ]
-            ),
-            "tag": (
-                git_state["tag"]
-            ),
-        },
-        "runtime": {
-            "python": (
-                platform
-                .python_version()
-            ),
-            "platform": (
-                platform.platform()
-            ),
-            "cuda_available": (
-                cuda_available
-            ),
-            "torch_cuda_version": (
-                torch.version.cuda
-            ),
-            "gpu": gpu,
-        },
-        "packages": (
-            get_package_versions()
-        ),
-        "dataset": {
-            "feature_base_path": str(
-                FEATURE_BASE_PATH
-            ),
-            "feature_base_sha256": (
-                sha256_file(
-                    FEATURE_BASE_PATH
-                )
-            ),
-        },
-        "randomness": {
-            "random_seed": (
-                RANDOM_SEED
-            ),
-            "primary_experiment_seed": (
-                PRIMARY_EXPERIMENT_SEED
-            ),
-            "experiment_seeds": list(
-                EXPERIMENT_SEEDS
-            ),
-        },
-        "transformers": {
-            "bertimbau": {
-                "model_name": (
-                    BERTIMBAU_MODEL_NAME
-                ),
-                "revision": (
-                    BERTIMBAU_REVISION
-                ),
-            },
-            "albertina": {
-                "model_name": (
-                    ALBERTINA_MODEL_NAME
-                ),
-                "revision": (
-                    ALBERTINA_REVISION
-                ),
-            },
-        },
-        "temporal_folds": list(
-            TEMPORAL_FOLDS
-        ),
-    }
-
-
-def validate_or_create_official_run_manifest():
-    create_project_directories()
-
-    git_state = get_git_state()
-
-    if official_mode_enabled():
-        validate_official_git_state(
-            git_state
-        )
-
-    current_manifest = build_manifest(
-        git_state
-    )
-
-    if OFFICIAL_RUN_MANIFEST_PATH.exists():
-        with (
-            OFFICIAL_RUN_MANIFEST_PATH
-            .open(
-                "r",
-                encoding="utf-8",
-            )
-        ) as file:
-            existing = json.load(
-                file
-            )
-
-        if existing != current_manifest:
-            raise RuntimeError(
-                "Existing official-run manifest "
-                "does not match the current "
-                "commit, environment, dataset, "
-                "randomness, transformer revisions, "
-                "or temporal protocol."
-            )
-
-        print(
-            "Official-run manifest matches "
-            "the current experiment state."
-        )
-
-        return
-
-    if official_mode_enabled():
-        stale_directories = [
-            path
-            for path
-            in (
-                MODELS_DIR,
-                METRICS_DIR,
-                PREDICTIONS_DIR,
-            )
-            if directory_has_files(
-                path
-            )
-        ]
-
-        if stale_directories:
-            raise RuntimeError(
-                "Official execution must reach "
-                "manifest creation without "
-                "pre-existing model, metric, "
-                "or prediction files: "
-                + ", ".join(
-                    str(path)
-                    for path
-                    in stale_directories
-                )
-            )
-
-    temporary_path = (
-        OFFICIAL_RUN_MANIFEST_PATH
-        .with_suffix(
-            ".json.part"
-        )
-    )
-
-    if temporary_path.exists():
-        temporary_path.unlink()
-
-    with temporary_path.open(
-        "w",
+def write_json(path, value):
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = path.with_suffix(path.suffix + ".part")
+    temporary.write_text(
+        json.dumps(value, indent=2, ensure_ascii=False, allow_nan=False) + "\n",
         encoding="utf-8",
-    ) as file:
-        json.dump(
-            current_manifest,
-            file,
-            indent=2,
-            sort_keys=True,
-        )
-
-    temporary_path.replace(
-        OFFICIAL_RUN_MANIFEST_PATH
     )
+    temporary.replace(path)
 
-    print(
-        "Official-run reproducibility "
-        "manifest created."
-    )
 
-    print(
-        f"Saved to: "
-        f"{OFFICIAL_RUN_MANIFEST_PATH}"
-    )
+def source_files(root):
+    root = Path(root)
+    paths = [root / "main.py", root / "pyproject.toml", root / "uv.lock"]
+    for name in ("src", "scripts", "tests"):
+        paths.extend((root / name).rglob("*.py"))
+    return {str(path.relative_to(root)): sha256_file(path) for path in sorted(paths)}
+
+
+def execution_identity(root, source, tables):
+    root, source, tables = Path(root), Path(source), Path(tables)
+    provenance = json.loads((root / "logs/git_state.json").read_text(encoding="utf-8"))
+    files = source_files(root)
+    if provenance["files"] != files:
+        raise RuntimeError("Source files changed. Capture Git state again on the host.")
+    protocol = json.loads((tables / "experimental_protocol.json").read_text(encoding="utf-8"))
+    for key in ("source_path", "source_size_bytes", "source_mtime_ns"):
+        protocol.pop(key, None)
+    packages = {}
+    for name in PACKAGE_NAMES:
+        try:
+            packages[name] = version(name)
+        except PackageNotFoundError:
+            packages[name] = None
+    identity = {
+        "source_sha256": sha256_file(source),
+        "membership_sha256": sha256_file(tables / "split_membership.parquet"),
+        "protocol": protocol,
+        "files": files,
+        "python": platform.python_version(),
+        "packages": packages,
+        "transformer": {"name": BERTIMBAU_MODEL_NAME, "revision": BERTIMBAU_REVISION,
+                        "max_length": BERTIMBAU_MAX_LENGTH},
+    }
+    fingerprint = hashlib.sha256(
+        json.dumps(identity, sort_keys=True, separators=(",", ":")).encode()
+    ).hexdigest()
+    return identity, fingerprint, provenance
+
+
+def validate_execution(root=None, source=None, tables=None):
+    root = Path(root) if root is not None else PROJECT_ROOT
+    source = Path(source) if source is not None else FEATURE_BASE_PATH
+    tables = Path(tables) if tables is not None else TABLES_DIR
+    manifest = json.loads((tables / "execution_manifest.json").read_text(encoding="utf-8"))
+    identity, fingerprint, _ = execution_identity(root, source, tables)
+    if manifest["fingerprint"] != fingerprint or manifest["identity"] != identity:
+        raise RuntimeError("Execution inputs changed. Existing results cannot be reused.")
+    return manifest
+
+
+def register_execution(root=None, source=None, tables=None):
+    root = Path(root) if root is not None else PROJECT_ROOT
+    source = Path(source) if source is not None else FEATURE_BASE_PATH
+    tables = Path(tables) if tables is not None else TABLES_DIR
+    if not (root / "logs/git_state.json").is_file():
+        raise FileNotFoundError("Run python3 scripts/capture_git_state.py on the host first.")
+    destination = tables / "execution_manifest.json"
+    if destination.exists():
+        manifest = validate_execution(root, source, tables)
+        print(f"Execution manifest verified: {destination}")
+        return manifest
+    build_temporal_protocol(source, tables)
+    identity, fingerprint, provenance = execution_identity(root, source, tables)
+    manifest = {"fingerprint": fingerprint, "identity": identity, "git": provenance}
+    write_json(destination, manifest)
+    print(f"Execution registered: {fingerprint}")
+    return manifest

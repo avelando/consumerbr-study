@@ -33,7 +33,7 @@ REQUIRED_COLUMNS = {
 def write_csv(path, rows):
     temporary = path.with_suffix(path.suffix + ".part")
     with temporary.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=list(rows[0]))
+        writer = csv.DictWriter(file, fieldnames=list(rows[0]), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     temporary.replace(path)

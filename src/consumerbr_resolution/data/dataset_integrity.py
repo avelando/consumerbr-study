@@ -358,6 +358,7 @@ def validate_dataset_integrity():
                 "value",
                 "passed",
             ],
+            lineterminator="\n",
         )
 
         writer.writeheader()

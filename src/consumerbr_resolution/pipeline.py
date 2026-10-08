@@ -71,6 +71,12 @@ STAGES = [
         "experiments.temporal_protocol",
         "build_temporal_protocol",
     ),
+    Stage("register-execution", "Register and verify execution inputs",
+          "experiments.reproducibility", "register_execution"),
+    Stage("company-baseline", "Evaluate smoothed historical company rate",
+          "baselines", "evaluate_historical_baselines"),
+    Stage("export-reports", "Export aggregate reports for publication",
+          "experiments.report_export", "export_reports"),
 ]
 
 
