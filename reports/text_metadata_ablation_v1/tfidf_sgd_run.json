@@ -1,0 +1,37 @@
+{
+  "fingerprint": "25a0f1aa27bbc805a0552041c3e8184ec57ff7ec097acca873f1142a819abe39",
+  "selected_alpha": 1e-05,
+  "selection_seed": 42,
+  "seeds": [
+    42,
+    13,
+    101
+  ],
+  "training_runs": 5,
+  "tie_break": "first configured alpha; earliest epoch",
+  "vocabulary_size": 100000,
+  "artifacts": {
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/vectorizer.joblib": "c19f184dbcbd9aa62058810da0f3661f7b72134db3eed1c44d6583b75850e0de",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/vectorizer_run.json": "ac628101bd3ca6d4d2c776758c824f7a9811d3423853703412e6bada37efa28a",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_00_seed_42/run.json": "aa36817282dc4db0b23bc40271f080d4be76f313c320ea516c128f92373dfa7f",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_00_seed_42/model.joblib": "645f9ccef49673fb626d0e2cad63d136a32a1cd367443d7bca6f01a646b85ed8",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_01_seed_42/run.json": "3a79a6f75c032abb51b67083cafbb3b9fc7112676bdbbe2d6ea46fcdaed2d68b",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_01_seed_42/model.joblib": "16b723655131d1773b36d87fbb401eef738a986167ad357c398247875e55e5a2",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_02_seed_42/run.json": "4ea08325b7e0096f5ac13b4035704c50605dfd670e55e0a7aae0190d6fab930e",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/candidate_02_seed_42/model.joblib": "b43f38746f770e89f139ef9408d812f59ea2e7b8c5726f1abf8bfa825ce4329f",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/selected_seed_13/run.json": "cd205404d7d97be29894ce47092285313cc40f0bc6645530a085028240cea66d",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/selected_seed_13/model.joblib": "06699d9494309bae070f51ce2c16f4800d1d460de28d3be690f9efe6c3e63af8",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/selected_seed_101/run.json": "4324cd7a2fe68fb4eda17e29f02bb5f29385d64cbd1de2e4251268f69d64d840",
+    "models/text_metadata_ablation_v1/classical/tfidf_sgd/selected_seed_101/model.joblib": "8d8858524220dff30fdcb82ed35d473d503fdfe39f2557180ac6d0f447b458ca",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_42/validation.parquet": "1b373197784c758aee10e09c8ea496a793a2a9ef921e2edb4100128fdf4c1b0c",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_42/test.parquet": "837208c37f1f36250154a92c10bc3f8d020801dd0e179b93060889dfcff8bf3a",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_13/validation.parquet": "3d51256ab090f4c4c0d0805a6935d4d47d6a3a263b5940373bcbe77bd1446700",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_13/test.parquet": "9b9e2e68c401a7ee8d7e273d5010a814906c551f65158fc614cff65f7cc5af1b",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_101/validation.parquet": "ffcf96b0d10ce8ecc4b5a32ec215dad96e94e2b5033ae993d74b17a4207e90ad",
+    "results/text_metadata_ablation_v1/predictions/tfidf_sgd/seed_101/test.parquet": "08a9d08154be6445b66c132c7bcfb2913bf2e9d31194b8e2914c78be2b2751ac",
+    "results/text_metadata_ablation_v1/tables/tfidf_sgd_selection.csv": "b994a0f47569ddf082fab084998813bcb05790a2e036e9ae88db7a88ffea4e7d",
+    "results/text_metadata_ablation_v1/tables/tfidf_sgd_training_history.csv": "3b8c3f3d9553b3290563adaf8b04e649c758d63aa2be6044223572408548f3f6",
+    "results/text_metadata_ablation_v1/tables/tfidf_sgd_metrics.csv": "a954e9b520587a0c3acd6fff093b0ba2f2d4ba66337a49ecfd3fc29b8cf2e9d9",
+    "results/text_metadata_ablation_v1/tables/tfidf_sgd_summary.csv": "2bb9249ea2ff4857b6145a867984f08e2241332aa5628a2d95406897037be93f"
+  }
+}

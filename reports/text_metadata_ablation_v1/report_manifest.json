@@ -1,6 +1,6 @@
 {
-  "stage": "company_baseline",
-  "fingerprint": "c6343983694fa155759ab160c3e71c3cce87c20601d5026124f62496f86637a6",
+  "stage": "tfidf_sgd",
+  "fingerprint": "25a0f1aa27bbc805a0552041c3e8184ec57ff7ec097acca873f1142a819abe39",
   "files": {
     "dataset_integrity_audit.csv": "c5ffbc52e95ebc10d5cc3b8a9bfd628c21cbc661540817249a36ab9acf22891b",
     "temporal_protocol_audit.csv": "28c6f0d8d5f3b504015ff73de2b3272d1755700c5071eda1e77e82eb011c31c6",
@@ -16,8 +16,13 @@
     "outcome_observation_monthly.csv": "05dbb177247423bb6bef89ad3a8df647b98709fe9742c3dc6ed0ad2ac23951a1",
     "outcome_observation_text.csv": "3f61aa15cc271da1166e10236b82d695dda4086b6451dfa157169a915432801c",
     "experimental_protocol.json": "eabcb1e96393837a9e7060b59a358fbc25b3984543a3a7a883cf1ab672b34dd2",
-    "execution_manifest.json": "700719a9f7082da2c2f2d303651a11bede8d7f2d48661aac7734cf7106dd4e2f",
-    "company_baseline_run.json": "86c328209022435b620d66710af2632ce45cf9963a6bea172de17a49b5e30cd8",
-    "company_baseline_metrics.csv": "eddfbda894e756b7012039a7c4d1281fd478294de2654b726d52f78da0262153"
+    "execution_manifest.json": "a1b6a438c3b3a0bf6a420aded419f4a6b87a16780dba0d5badbcb480c687f197",
+    "company_baseline_run.json": "2618ff7c3f41ccc1995bfbda1d1225fe7009b46467f74be89fb457d3bd62942b",
+    "company_baseline_metrics.csv": "a61ce4661af207da7832b5666a5e1d3dea7ebe50abe0ce02217fa1f7fb3aac8f",
+    "tfidf_sgd_selection.csv": "b994a0f47569ddf082fab084998813bcb05790a2e036e9ae88db7a88ffea4e7d",
+    "tfidf_sgd_training_history.csv": "3b8c3f3d9553b3290563adaf8b04e649c758d63aa2be6044223572408548f3f6",
+    "tfidf_sgd_metrics.csv": "a954e9b520587a0c3acd6fff093b0ba2f2d4ba66337a49ecfd3fc29b8cf2e9d9",
+    "tfidf_sgd_summary.csv": "2bb9249ea2ff4857b6145a867984f08e2241332aa5628a2d95406897037be93f",
+    "tfidf_sgd_run.json": "47034af43078ce2941485fc54108b5d6caf8bc3e6b9c4b3f0377323aff570212"
   }
 }
